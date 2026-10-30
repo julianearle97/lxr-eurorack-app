@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/drum1-mono-rumble
+      - feature/drum1-mono-rumble-v2
 jobs:
   compile:
     runs-on: ubuntu-24.04
