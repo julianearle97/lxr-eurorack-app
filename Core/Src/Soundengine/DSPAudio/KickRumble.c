@@ -37,10 +37,10 @@ void KickRumble_set(KickRumble *r, float sr, float level,
     r->hp_coef = pole(hp_hz, sr);
     r->lp_coef = pole(lp_hz, sr);
     r->duck_amount = clamp(duck, 0.0f, 1.0f);
-    /* 2 ms attack, 250 ms exponential recovery, and 90 ms full-depth hold.
+    /* 2 ms attack, ~150 ms exponential recovery, and 90 ms full-depth hold.
      * Keep the wet gain near zero at maximum duck, not merely a subtle dip. */
     r->duck_attack_coef = pole(500.0f, sr);
-    r->duck_release_coef = pole(4.0f, sr);
+    r->duck_release_coef = pole(6.5f, sr);
     r->duck_hold_length = (uint32_t)(sr * 0.090f);
     if (r->duck_amount == 0.0f) {
         r->duck_hold_left = 0;
