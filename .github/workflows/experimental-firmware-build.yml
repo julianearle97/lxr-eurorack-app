@@ -11,6 +11,7 @@ on:
       - feature/rumble-bass-v5
       - fix/idm-event-playback-v1561
       - feature/sample-voice-mode-user-wavs
+      - fix/sample-mode-hihat-7-voices
 jobs:
   compile:
     runs-on: ubuntu-24.04
@@ -50,6 +51,6 @@ jobs:
       - name: Upload experimental firmware image (first hardware test)
         uses: actions/upload-artifact@v4
         with:
-          name: lxr-v1.57.0-sample-mode-incomplete
+          name: lxr-v1.57.1-all-seven-sample-mode
           path: build/release/LXRE*.img
           if-no-files-found: error
