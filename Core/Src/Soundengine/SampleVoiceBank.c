@@ -14,14 +14,18 @@ void SampleVoiceBank_setVoice(SampleVoiceBank *b,uint8_t voice,uint8_t enabled,
                               uint8_t sample_id,uint8_t pitch,uint8_t volume) {
     if(voice>=SAMPLE_VOICE_COUNT)return;
     SampleVoiceState *v=&b->voices[voice];
-    v->enabled=!!enabled;
-    v->sample_id=sample_id%SAMPLE_SLOT_COUNT;
+    const uint8_t new_enabled=!!enabled;
+    const uint8_t new_sample=sample_id%SAMPLE_SLOT_COUNT;
+    /* Keep the playing one-shot alive while editing pitch or volume. */
+    if(v->enabled != new_enabled || v->sample_id != new_sample)
+        v->phase_q16=UINT64_MAX;
+    v->enabled=new_enabled;
+    v->sample_id=new_sample;
     v->volume=volume>127?127:volume;
     /* Pitch 64 = original speed; 0/127 ~= -24/+24 semitones. */
     int32_t semitones=((int32_t)pitch-64)*24/63;
     float ratio=exp2f((float)semitones/12.0f);
     v->increment_q16=(uint32_t)(65536.0f*ratio);
-    v->phase_q16=UINT64_MAX;
 }
 void SampleVoiceBank_trigger(SampleVoiceBank *b,uint8_t voice,uint8_t velocity) {
     if(voice>=SAMPLE_VOICE_COUNT)return;
