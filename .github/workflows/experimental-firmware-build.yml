@@ -7,6 +7,7 @@ on:
       - feature/drum1-mono-rumble-v2
       - feature/drum1-mono-rumble-v3
       - feature/drum1-mono-rumble-v4
+      - feature/idm-trigger-engine
 jobs:
   compile:
     runs-on: ubuntu-24.04
@@ -20,6 +21,10 @@ jobs:
         run: |
           cc -O2 -Wall -Wextra -ICore/Inc tests/kick_rumble_host.c Core/Src/Soundengine/DSPAudio/KickRumble.c -lm -o /tmp/lxr-kick-rumble-test
           /tmp/lxr-kick-rumble-test
+      - name: Test internal IDM scheduler
+        run: |
+          cc -std=c11 -Wall -Wextra -ICore/Inc tests/idm_trigger_host.c Core/Src/Soundengine/IdmTriggers.c -o /tmp/idm-test
+          /tmp/idm-test
       - name: Configure
         run: cmake --preset release
       - name: Build
