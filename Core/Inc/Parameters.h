@@ -494,7 +494,12 @@ enum ParamEnums
 
 	PAR_MORPH_TARGET, //which kit to morph to
 
-	NUM_PARAMS	
+	NUM_PARAMS,
+	PAR_RUMBLE_LEVEL = NUM_PARAMS,
+	PAR_RUMBLE_DECAY,
+	PAR_RUMBLE_LP,
+	PAR_RUMBLE_DUCK,
+	NUM_CUSTOM_PARAMS
 };
 
 extern uint8_t parameterOrder[END_OF_SOUND_PARAMETERS];
