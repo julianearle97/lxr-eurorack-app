@@ -24,9 +24,9 @@ jobs:
       - name: Inspect ELF size
         run: |
           find build/release -name '*.elf' -exec arm-none-eabi-size -A {} \;
-      - name: Upload firmware for review (NOT hardware validated)
+      - name: Upload experimental firmware image (first hardware test)
         uses: actions/upload-artifact@v4
         with:
-          name: untested-lxr-firmware-do-not-flash
+          name: lxr-custom-rumble-v1.51.99-experimental
           path: build/release/LXRE*.img
           if-no-files-found: error
