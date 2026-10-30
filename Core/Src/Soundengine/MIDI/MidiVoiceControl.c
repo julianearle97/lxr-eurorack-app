@@ -46,7 +46,7 @@ void voiceControl_idmSetVoice(uint8_t voice,uint8_t mode,uint8_t chance,uint8_t 
 }
 void voiceControl_idmSetMaster(uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length,uint8_t mask) {
     idm.master=(IdmSettings){mode,chance,length,amount,(uint8_t)(mode!=IDM_OFF)};
-    idm.master_mask=mask & 0x3f;
+    idm.master_mask=mask & 0x7f;
 }
 void voiceControl_idmScope(uint8_t scope) {
     idm.scope=(scope==2)? IDM_MASTER:IDM_INDEPENDENT;
@@ -89,7 +89,7 @@ void voiceControl_processQueue()
 				if((buttonHandler_getMutedVoices()  & (1 << voice)) == 0)
 				{
 
-					if(voice<6) Idm_input(&idm,HAL_GetTick(),(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice],idm_emit,0);
+					if(voice<7) Idm_input(&idm,HAL_GetTick(),(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice],idm_emit,0);
                     else idm_emit(0,(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice]);
 				}
 			}
