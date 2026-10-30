@@ -1,31 +1,40 @@
-# Drum 1 mono rumble — work in progress
+# Custom Drum 1 mono rumble (experimental)
 
-This branch is an **unflashed experiment**, not a firmware release.
+**Unofficial modified firmware. Not tested on physical hardware.**
+Retains the factory firmware on `main`, and keeps all development on `feature/drum1-mono-rumble`.
 
-## Intended behavior
+## User controls
 
-- A strictly mono kick-generated reverb/rumble, mixed with Drum 1 **before** its existing output assignment.
-- Drum 1 Mix page: four controls — Level, Decay, LP and Duck. HP is fixed internally around 25 Hz. All other drum pages unchanged.
-- Kick trigger restarts ducking but does not clear the reverb tail.
-- Level = 0 yields unaltered dry kick.
-- No use of the global FX bus; global effects stay available.
-- Stored per-kit, with older kits defaulting to rumble off.
+On Drum 1, select **Mix** and use the encoder to scroll past the factory Mix controls into the new **Rumble** group. The four panel knobs now map to:
 
-## Implemented here
+1. **Lvl** — wet rumble mix, 0 = original dry kick (factory default).
+2. **Dcy** — rumble feedback/decay.
+3. **LPF** — rumble low-pass cutoff, logarithmic ~60–1000 Hz.
+4. **Dck** — transient-triggered wet-only ducking.
 
-- Standalone `KickRumble.h` / `KickRumble.c` prototype: mono delay network, diffuser, high-pass, low-pass and trigger-initiated wet ducking.
-- This code is **not yet linked into CMake, menu, mixer, trigger engine, or presets**, deliberately avoiding a possibly unsafe hardware image.
+A fixed **25 Hz high-pass** removes excessive subsonic rumble without requiring a knob. The effect is **mono** and is inserted after Drum 1 voice processing but before the original output routing. It follows Drum 1's output assignment; the global FX bus remains separate.
 
-## Required integration before a hardware build
+## Kit compatibility
 
-1. Determine actual engine sample rate and memory sections; current prototype consumes ~44 KB of float delay memory and has fixed delay sizes designed for roughly 44.1 kHz.
-2. Confirm processor budget and saturation behavior with all six voices + normal FX.
-3. Allocate from an appropriate SRAM section; do not place the buffer in the limited 128 KB DTCM inadvertently.
-4. Call `KickRumble_trigger` at the Drum 1 event, not from raw input CV.
-5. Process Drum 1's mono voice buffer **before** `mixer_addDataToOutput*` so the wet signal follows the existing routing.
-6. Add per-voice Mix UI values and safe bounds; persist them via versioned/compatible kit format.
-7. Keep a full bypass at level 0 and verify no stale audible tail when turning the effect back on.
-8. Verify the source builds with the documented ARM toolchain and check SRAM/ITCM use.
-9. Listen for glitches, gain change, unstable feedback, excessive sub frequencies, and ducking clicks before distributing any update image.
+An 8-byte `RMB\x01` extension is appended to new `.snd` drum-kit files, following the original factory sound data. On loading old kit files without this extension the effect defaults to dry; the original sound parameter indices remain unchanged. **Back up your SD card before any experimental firmware tests.**
 
-**Do not flash a binary based on this prototype alone.**
+## Verification status
+
+- Host DSP tests: automated in GitHub Actions.
+- ARM firmware compilation: automated in GitHub Actions.
+- Real-time processor load and acoustic quality: **not verified on physical hardware**.
+- Kit saving, loading and menu navigation: **compiled but not tested on physical hardware**.
+- No oscilloscope/audio loopback hardware tests available here.
+
+## Important first-flash precautions
+
+Keep a copy of official firmware and a full SD-card backup. Bootloader updates are **not** required. Use only the standard updater procedure in the repository README. Do not run `flash_full` (this would overwrite the bootloader).
+
+Start with Rumble Level = 0 and headphones/monitor volume low; test one low-volume kick first, then gradually enable rumble. Monitor for clipping, unexpected audio or timing glitches. If anything behaves incorrectly, return to factory firmware using the SD updater.
+
+## Future work
+
+- Hardware listening and DSP profiling with six simultaneous voices and global FX.
+- Better bypass smoothing and parameter response.
+- Add click-free controls, verify repeated/retriggered kick timing.
+- IDUM-style glitch engine remains **out of scope** for this branch.
