@@ -9,6 +9,7 @@ on:
       - feature/drum1-mono-rumble-v4
       - feature/idm-trigger-engine
       - feature/rumble-bass-v5
+      - fix/idm-event-playback-v1561
 jobs:
   compile:
     runs-on: ubuntu-24.04
@@ -36,6 +37,6 @@ jobs:
       - name: Upload experimental firmware image (first hardware test)
         uses: actions/upload-artifact@v4
         with:
-          name: lxr-v1.56.0-bass-rumble-experimental
+          name: lxr-v1.56.1-idm-playback-fix-experimental
           path: build/release/LXRE*.img
           if-no-files-found: error
