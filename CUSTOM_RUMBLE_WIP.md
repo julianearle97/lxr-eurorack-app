@@ -5,7 +5,7 @@ This branch is an **unflashed experiment**, not a firmware release.
 ## Intended behavior
 
 - A strictly mono kick-generated reverb/rumble, mixed with Drum 1 **before** its existing output assignment.
-- Drum 1 Mix page: Level, Decay, HP, LP and Duck. All other drum pages unchanged.
+- Drum 1 Mix page: four controls — Level, Decay, LP and Duck. HP is fixed internally around 25 Hz. All other drum pages unchanged.
 - Kick trigger restarts ducking but does not clear the reverb tail.
 - Level = 0 yields unaltered dry kick.
 - No use of the global FX bus; global effects stay available.
