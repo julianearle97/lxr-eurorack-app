@@ -45,6 +45,21 @@ static uint16_t morph_index = 0;
 char savefileNames[NUM_KIT_SLOTS][NUM_SAVEFILE_NAMES][8];
 /* Separate custom per-kit state preserves original factory parameter indices. */
 static uint8_t rumbleKitParams[NUM_KIT_SLOTS][4];
+/* 7 voices x 4 controls + 4 master controls. */
+#define IDM_KIT_BYTES 32
+static uint8_t idmKitParams[NUM_KIT_SLOTS][IDM_KIT_BYTES];
+static void idm_saveKit(uint8_t kit) {
+    if(kit>=NUM_KIT_SLOTS) return;
+    for(unsigned k=0;k<IDM_KIT_BYTES;++k)
+        idmKitParams[kit][k]=activeParameters[PAR_IDM_V1_MODE+k];
+}
+static void idm_loadKit(uint8_t kit) {
+    if(kit>=NUM_KIT_SLOTS) return;
+    for(unsigned k=0;k<IDM_KIT_BYTES;++k)
+        activeParameters[PAR_IDM_V1_MODE+k]=idmKitParams[kit][k];
+    menu_applyIdm();
+}
+
 static void rumble_saveKit(uint8_t kit)
 {
     if(kit >= NUM_KIT_SLOTS) return;
@@ -501,6 +516,7 @@ uint8_t preset_isNameEmpty(char* name)
 void preset_init(uint8_t presetNr)
 {
 	memset(rumbleKitParams[presetNr],0,4);
+	memset(idmKitParams[presetNr],0,IDM_KIT_BYTES);
 
 	//const uint8_t presetNr = menu_selectedPresetNr[SAVE_TYPE_KIT];
 
@@ -545,6 +561,7 @@ void preset_init(uint8_t presetNr)
 	//copy parameters to edit buffer
 	memcpy(activeParameters, mainParameters[presetNr], sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
 	rumble_loadKit(presetNr);
+		idm_loadKit(presetNr);
 	preset_sendDrumsetParameters();
 	//frontPanel_sendData(PRESET,PRESET_LOAD,presetNr);
 
@@ -712,6 +729,7 @@ void preset_saveDrumsetRam(uint8_t presetNr, uint8_t isMorph)
 		//copy edit buffer to parameter array
 		memcpy(mainParameters[presetNr], activeParameters, sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
 		rumble_saveKit(presetNr);
+		idm_saveKit(presetNr);
 	}
 }
 //----------------------------------------------------
@@ -770,6 +788,16 @@ FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 		return FR_DISK_ERR;
 	}
 	
+	/* V1 custom glitch extension, after the pre-existing RMB block. */
+	if(!isMorph) idm_saveKit(presetNr);
+	uint8_t idmExtension[4+IDM_KIT_BYTES]={'I','D','M',1};
+	memcpy(idmExtension+4,idmKitParams[presetNr],IDM_KIT_BYTES);
+	res=f_write((FIL*)&SDFile,idmExtension,sizeof(idmExtension),&bytesWritten);
+	if(res!=FR_OK || bytesWritten != sizeof(idmExtension)) {
+		f_close((FIL*)&SDFile);
+		return FR_DISK_ERR;
+	}
+
 	//close the file
 	f_close((FIL*)&SDFile);
 
@@ -1097,6 +1125,14 @@ FRESULT preset_loadDrumsetSD(uint8_t presetNr)
 		if(extraRes==FR_OK && n==sizeof(ext) && ext[0]=='R' && ext[1]=='M' && ext[2]=='B' && ext[3]==1) {
 			for(unsigned k=0;k<4;++k) rumbleKitParams[presetNr][k] = ext[4+k] <= 127 ? ext[4+k] : 127;
 		}
+		/* Old factory/V4 kits without IDM extension remain glitch-free. */
+		uint8_t idmExt[4+IDM_KIT_BYTES];
+		UINT idmRead=0;
+		FRESULT idmRes=f_read((FIL*)&SDFile,idmExt,sizeof(idmExt),&idmRead);
+		if(idmRes==FR_OK && idmRead==sizeof(idmExt) && idmExt[0]=='I' && idmExt[1]=='D' && idmExt[2]=='M' && idmExt[3]==1) {
+			for(unsigned k=0;k<IDM_KIT_BYTES;k++) idmKitParams[presetNr][k]=idmExt[k+4];
+		}
+
 	}
 #if !CALC_SAMPLES_IN_INTERRUPT
 	//to prevent audio dropouts
