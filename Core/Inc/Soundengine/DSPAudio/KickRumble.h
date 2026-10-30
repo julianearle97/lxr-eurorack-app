@@ -22,7 +22,7 @@ typedef struct {
     float diffuser[KICK_RUMBLE_AP];
     float predelay[KICK_RUMBLE_PREDELAY];
     uint32_t p1, p2, p3, pa, pp;
-    float hp_state, lp_state, duck_gain;
+    float hp_state, lp_state, lp_state2, bass_state, duck_gain;
     float hp_coef, lp_coef, feedback, level, duck_amount;
     float duck_release_coef;
     float duck_attack_coef, duck_target;
