@@ -4370,6 +4370,14 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
 		activeParameters[paramNr] = dtypeValue;
 	}
 
+	/* Custom rumble knobs are local DSP controls, not front-panel MIDI/global params. */
+	if(paramNr >= PAR_RUMBLE_LEVEL && paramNr <= PAR_RUMBLE_DUCK) {
+		mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL],
+			activeParameters[PAR_RUMBLE_DECAY], activeParameters[PAR_RUMBLE_LP],
+			activeParameters[PAR_RUMBLE_DUCK]);
+		return 1;
+	}
+
 	switch(parameter_dtypes[paramNr] & 0xFF)
 	{
 
