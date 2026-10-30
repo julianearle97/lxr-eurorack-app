@@ -10,6 +10,7 @@ on:
       - feature/idm-trigger-engine
       - feature/rumble-bass-v5
       - fix/idm-event-playback-v1561
+      - feature/sample-voice-mode-user-wavs
 jobs:
   compile:
     runs-on: ubuntu-24.04
@@ -27,6 +28,10 @@ jobs:
         run: |
           cc -std=c11 -Wall -Wextra -ICore/Inc tests/idm_trigger_host.c Core/Src/Soundengine/IdmTriggers.c -o /tmp/idm-test
           /tmp/idm-test
+      - name: Test sample mode DSP prototype
+        run: |
+          cc -O2 -std=c11 -Wall -Wextra -ICore/Inc tests/sample_voice_host.c Core/Src/Soundengine/SampleVoiceBank.c -lm -o /tmp/sample-test
+          /tmp/sample-test
       - name: Configure
         run: cmake --preset release
       - name: Build
