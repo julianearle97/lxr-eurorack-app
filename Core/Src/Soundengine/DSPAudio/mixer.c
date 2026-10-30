@@ -16,6 +16,7 @@
 #include "Soundengine/DSPAudio/mixer.h"
 #include "Soundengine/DSPAudio/KickRumble.h"
 #include "Soundengine/SampleVoiceControl.h"
+#include "Soundengine/CvSidechainExperiment.h"
 #include "Soundengine/config.h"
 #include "Soundengine/AudioCodecManager.h"
 #include "Soundengine/DSPAudio/CymbalVoice.h"
@@ -748,6 +749,7 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
+	cv_sidechain_mix(output2,OUTPUT_DMA_SIZE);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
