@@ -894,6 +894,11 @@ void menu_init()
 		activeParameters[PAR_SAMPLE_V1_PITCH+i*4] = 64;
 		activeParameters[PAR_SAMPLE_V1_VOLUME+i*4] = 127;
 	}
+    activeParameters[PAR_CV_DUCK_AMOUNT]=127;
+    activeParameters[PAR_CV_DUCK_HPF]=0;
+    activeParameters[PAR_CV_INPUT_GAIN]=127;
+    activeParameters[PAR_CV_DUCK_RELEASE]=60;
+    menu_applyCvSidechain();
 	/* Factory kits start with the custom effect disabled. */
 	activeParameters[PAR_RUMBLE_LEVEL] = 0;
 	activeParameters[PAR_RUMBLE_DECAY] = 64;
@@ -3376,7 +3381,11 @@ static void menu_encoderChangeParameter(int8_t inc)
         menu_applyIdm();
         return;
     }
-	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
+	if(paramNr >= PAR_CV_DUCK_AMOUNT && paramNr <= PAR_CV_DUCK_RELEASE) {
+        menu_applyCvSidechain();
+        return;
+    }
+    if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
         const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
         if(offset%4==1 && *paramValue>12)*paramValue=11;
         menu_applySampleVoice((uint8_t)(offset/4));
@@ -4497,7 +4506,11 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
         menu_applyIdm();
         return 1;
     }
-	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
+	if(paramNr >= PAR_CV_DUCK_AMOUNT && paramNr <= PAR_CV_DUCK_RELEASE) {
+        menu_applyCvSidechain();
+        return 1;
+    }
+    if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
         const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
         if(offset%4==1 && activeParameters[paramNr]>12) activeParameters[paramNr]=11;
         menu_applySampleVoice((uint8_t)(offset/4));
