@@ -107,6 +107,7 @@ add_library(lxr_engine OBJECT
     Src/Soundengine/FxBus.c
     Src/Soundengine/ModMatrix_Processor.c
     Src/Soundengine/Soundengine.c
+    Src/Soundengine/SampleVoiceBank.c
     Src/Soundengine/TriggerProcessor.c
     Src/Soundengine/IdmTriggers.c
 )
