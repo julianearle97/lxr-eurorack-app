@@ -41,8 +41,8 @@ static KickRumble drum1Rumble;
 void mixer_setDrum1RumbleParams(uint8_t level, uint8_t decay, uint8_t lowpass, uint8_t duck)
 {
     /* Fixed 25 Hz high-pass. LP maps approximately 60 Hz to 1000 Hz. */
-    const float lp = 60.0f * powf(1000.0f/60.0f, lowpass / 127.0f);
-    KickRumble_set(&drum1Rumble, 44100.0f, level / 127.0f, decay / 127.0f, 25.0f, lp, duck / 127.0f);
+    const float lp = 35.0f * powf(900.0f/35.0f, lowpass / 127.0f);
+    KickRumble_set(&drum1Rumble, 44100.0f, level / 127.0f, decay / 127.0f, 18.0f, lp, duck / 127.0f);
 }
 void mixer_triggerDrum1Rumble(void)
 {
