@@ -4,7 +4,6 @@
  */
 #include "Soundengine/CvSidechainExperiment.h"
 #include "IO/adcPots.h"
-#include "Soundengine/CvAudioCapture.h"
 #include <stdint.h>
 static volatile uint8_t kick_pending;
 static float duck=1.0f;
@@ -20,7 +19,10 @@ void cv_sidechain_mix(int16_t *output3_interleaved,uint32_t frames){
     /* The normal ADC DMA scans 13 pots/CVs, not an audio-rate stream.
        Capture its most recent CV1 value once per block as a deliberately
        degraded proof-of-concept. DC blocking avoids enormous offset. */
-    /* Stream actual ADC CV1 conversions rather than one per audio block. */
+    float v=(float)(adc_buf[8]>>4);
+    float x=(2048.0f-v)*8.0f;
+    dc+=0.004f*(x-dc);
+    x-=dc;
     /* 12..350ms one-pole recovery. Log-spaced high pass from 20..1600Hz. */
     const float release_ms=12.0f+338.0f*((float)release/127.0f)*((float)release/127.0f);
     const float recover=1.0f/(44.1f*release_ms);
@@ -28,9 +30,8 @@ void cv_sidechain_mix(int16_t *output3_interleaved,uint32_t frames){
     const float hp_coef=(6.2831853f*cutoff)/(44100.0f+6.2831853f*cutoff);
     const float makeup=(float)input_gain/127.0f;
     for(uint32_t i=0;i<frames;i++){
-       float x=(2048.0f-cv_audio_capture_read())*8.0f;
-       dc+=0.001f*(x-dc);
-       float s=x-dc;
+       float blend=(float)i/(float)(frames?frames:1);
+       float s=last+(x-last)*blend;
        duck+=(1.0f-duck)*recover;
        hp_low+=hp_coef*(s-hp_low);
        s=(s-hp_low)*makeup;
@@ -41,5 +42,5 @@ void cv_sidechain_mix(int16_t *output3_interleaved,uint32_t frames){
        if(y< -32768)y=-32768;
        output3_interleaved[2*i]=(int16_t)y;
     }
-    last=0.0f;
+    last=x;
 }
