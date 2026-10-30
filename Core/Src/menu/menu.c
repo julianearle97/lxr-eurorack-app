@@ -3439,12 +3439,12 @@ static void menu_moveToMenuItem(int8_t inc)
         const uint8_t page=menuIndex>>PAGE_SHIFT;
         const uint8_t pos=menuIndex&MASK_PARAMETER;
         const uint8_t samplePage=(menu_activePage==VOICE1_PAGE)?10:9;
-        if(inc>0 && page==0 && pos==3) {
+        if(inc>0 && page==0 && pos==(menu_activePage==VOICE7_PAGE ? 2 : 3)) {
             menuIndex=(uint8_t)(samplePage<<PAGE_SHIFT);
             return;
         }
         if(inc<0 && page==samplePage && pos==0) {
-            menuIndex=3;
+            menuIndex=(uint8_t)(menu_activePage==VOICE7_PAGE ? 2 : 3);
             return;
         }
     }
