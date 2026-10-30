@@ -1,4 +1,4 @@
-/* Original 1.5s ride user-provided sound, mono signed PCM8. */
+/* Original 1.5s ride user-provided sound, signed PCM8, 44.1kHz. */
 #include <stdint.h>
 const int8_t lxr_old_ride[66150]={
 1,-1,1,-1,1,-1,1,-1,4,-9,-10,4,18,7,-89,-13,42,2,10,21,1,-35,49,0,12,26,-14,4,9,7,4,-2,-6,22,28,-19,-35,-19,7,25,
