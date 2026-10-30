@@ -16,6 +16,7 @@
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include "Soundengine/IdmTriggers.h"
 #include "Soundengine/SampleVoiceControl.h"
+#include "Soundengine/CvSidechainExperiment.h"
 #include "Soundengine/DSPAudio/DrumVoice.h"
 #include "Soundengine/DSPAudio/Snare.h"
 #include "Soundengine/DSPAudio/HiHat.h"
@@ -35,6 +36,7 @@ static uint8_t idmInitialized=0;
 static void idm_ensureInit(void) {if(!idmInitialized){Idm_init(&idm);idmInitialized=1;}}
 static void idm_emit(void *ctx,uint8_t voice,uint8_t note,uint8_t vel) {
     (void)ctx;
+    if(voice==0)cv_sidechain_kick();
     if(buttonHandler_getMutedVoices() & (1u<<voice)) return;
     SampleVoiceControl_trigger(voice,vel);
     if(SampleVoiceControl_isSample(voice)) {
