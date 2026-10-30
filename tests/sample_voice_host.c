@@ -25,5 +25,19 @@ int main(void){
  SampleVoiceBank_stop(&b,1);
  SampleVoiceBank_render(&b,1,buf,4);
  for(int i=0;i<4;i++)assert(buf[i]==0);
+ /* Editing volume or pitch must NOT rewind the currently playing sample. */
+ SampleVoiceBank_setVoice(&b,0,1,0,64,127);
+ SampleVoiceBank_trigger(&b,0,127);
+ SampleVoiceBank_render(&b,0,buf,2);
+ uint64_t phase_before=b.voices[0].phase_q16;
+ SampleVoiceBank_setVoice(&b,0,1,0,64,42);
+ assert(b.voices[0].phase_q16==phase_before);
+ SampleVoiceBank_setVoice(&b,0,1,0,99,42);
+ assert(b.voices[0].phase_q16==phase_before);
+ SampleVoiceBank_render(&b,0,buf,1);
+ assert(buf[0]!=0);
+ /* Switching to a different sample or SYN stops old playback. */
+ SampleVoiceBank_setVoice(&b,0,1,1,64,127);
+ assert(b.voices[0].phase_q16==UINT64_MAX);
  puts("sample bank pitch-volume host tests passed");
 }
