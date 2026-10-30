@@ -158,6 +158,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 		},
 
 	},
+	/* Custom Drum 1 RUMBLE page: four encoder controls. */
+	{
+		TEXT_VOLUME, TEXT_DECAY, TEXT_FILTER_F, TEXT_FX_RATIO, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+		PAR_RUMBLE_LEVEL, PAR_RUMBLE_DECAY, PAR_RUMBLE_LP, PAR_RUMBLE_DUCK, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+	},
 	//page 2 - Voice 2 - drum
 	{
 		//sub page 1
