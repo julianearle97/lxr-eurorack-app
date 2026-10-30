@@ -30,6 +30,7 @@
 #include "Soundengine/MIDI/MidiParser.h"
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Soundengine/Soundengine.h"
+#include "Soundengine/DSPAudio/mixer.h"
 
 FRESULT preset_savePatternSD(uint8_t presetNr);
 //FRESULT preset_loadPatternSD(uint8_t presetNr);
@@ -42,6 +43,20 @@ FRESULT preset_savePatternSD(uint8_t presetNr);
 static uint8_t morph_state = 0; //flag for non blocking morph
 static uint16_t morph_index = 0;
 char savefileNames[NUM_KIT_SLOTS][NUM_SAVEFILE_NAMES][8];
+/* Separate custom per-kit state preserves original factory parameter indices. */
+static uint8_t rumbleKitParams[NUM_KIT_SLOTS][4];
+static void rumble_saveKit(uint8_t kit)
+{
+    if(kit >= NUM_KIT_SLOTS) return;
+    for(unsigned i = 0; i < 4; ++i) rumbleKitParams[kit][i] = activeParameters[PAR_RUMBLE_LEVEL + i];
+}
+static void rumble_loadKit(uint8_t kit)
+{
+    if(kit >= NUM_KIT_SLOTS) return;
+    for(unsigned i = 0; i < 4; ++i) activeParameters[PAR_RUMBLE_LEVEL + i] = rumbleKitParams[kit][i];
+    mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL], activeParameters[PAR_RUMBLE_DECAY], activeParameters[PAR_RUMBLE_LP], activeParameters[PAR_RUMBLE_DUCK]);
+}
+
 
 char currentFolder[13];
 
@@ -622,6 +637,7 @@ void preset_loadDrumsetRam(uint8_t presetNr, uint8_t isMorph, uint8_t sendImmedi
 		//load asociated morph kit as well
 		//morphParameters = mainParameters[activeParameters[PAR_MORPH_KIT_DEST]];
 
+		rumble_loadKit(presetNr);
 		preset_saveLastUsedPresetNrToSD(presetNr);
 
 	}
@@ -693,6 +709,7 @@ void preset_saveDrumsetRam(uint8_t presetNr, uint8_t isMorph)
 		soundengine_process();
 		//copy edit buffer to parameter array
 		memcpy(mainParameters[presetNr], activeParameters, sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
+		rumble_saveKit(presetNr);
 	}
 }
 //----------------------------------------------------
