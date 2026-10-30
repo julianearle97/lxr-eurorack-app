@@ -20,7 +20,7 @@ if(NOT CMAKE_TOOLCHAIN_FILE)
 endif()
 
 project(LXR_V2_STM32F765_Eurorack
-    VERSION 1.51
+    VERSION 1.51.99
     DESCRIPTION "LXR V2 Eurorack drum module firmware"
     LANGUAGES C ASM
 )
