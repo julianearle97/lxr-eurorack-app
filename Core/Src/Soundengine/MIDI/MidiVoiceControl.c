@@ -31,6 +31,7 @@
 uint8_t voiceStatus[NUM_DRUM_VOICES];
 static IdmEngine idm;
 static uint8_t idmInitialized=0;
+static void idm_ensureInit(void) {if(!idmInitialized){Idm_init(&idm);idmInitialized=1;}}
 static void idm_emit(void *ctx,uint8_t voice,uint8_t note,uint8_t vel) {
     (void)ctx;
     if(buttonHandler_getMutedVoices() & (1u<<voice)) return;
@@ -41,14 +42,17 @@ static void idm_emit(void *ctx,uint8_t voice,uint8_t note,uint8_t vel) {
     if(!buttonHandler_getDrumButton()) led_pulseLed(LED_2+voice);
 }
 void voiceControl_idmSetVoice(uint8_t voice,uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length) {
+    idm_ensureInit();
     if(voice>=IDM_VOICES) return;
     idm.voice[voice]=(IdmSettings){mode,chance,length,amount,(uint8_t)(mode!=IDM_OFF)};
 }
 void voiceControl_idmSetMaster(uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length,uint8_t mask) {
+    idm_ensureInit();
     idm.master=(IdmSettings){mode,chance,length,amount,(uint8_t)(mode!=IDM_OFF)};
     idm.master_mask=mask & 0x7f;
 }
 void voiceControl_idmScope(uint8_t scope) {
+    idm_ensureInit();
     idm.scope=(scope==2)? IDM_MASTER:IDM_INDEPENDENT;
     if(!scope) {
        for(unsigned i=0;i<IDM_VOICES;i++) idm.voice[i].enabled=0;
