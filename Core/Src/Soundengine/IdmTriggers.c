@@ -25,7 +25,7 @@ void Idm_input(IdmEngine *e,uint32_t now,uint8_t voice,uint8_t note,uint8_t vel,
     const uint32_t interval=step/(2u+(s->param*6u)/127u);
     switch(s->mode) {
       case IDM_BURST: {
-        unsigned count=2u+(s->param*6u)/127u;
+        unsigned count=2u+(s->length*6u)/127u;
         for(unsigned i=0;i<count;i++) schedule(e,now+i*(interval?interval:1),voice,note,vel);
         break;
       }
@@ -35,17 +35,17 @@ void Idm_input(IdmEngine *e,uint32_t now,uint8_t voice,uint8_t note,uint8_t vel,
         break;
       }
       case IDM_BALL: {
-        unsigned n=2u+(s->param*5u)/127u;
+        unsigned n=2u+(s->length*5u)/127u;
         uint32_t t=now,dt=step/2u;
         for(unsigned i=0;i<n;i++){schedule(e,t,voice,note,vel);t+=dt?dt:1;dt=dt*3u/4u;}
         break;
       }
-      case IDM_DELAY: schedule(e,now+1u+(step*s->param)/127u,voice,note,vel);break;
+      case IDM_DELAY: schedule(e,now+1u+(step*s->param*(1u + s->length / 64u))/127u,voice,note,vel);break;
       case IDM_ROTATE: emit(ctx,(uint8_t)((voice+1+(s->param*4u)/127u)%IDM_VOICES),note,vel);break;
       case IDM_BREAK: {
         emit(ctx,voice,note,vel);
-        if(s->param>32) schedule(e,now+step/2u,voice,note,vel);
-        if(s->param>80) schedule(e,now+step*3u/4u,voice,note,vel);
+        if(s->length>32) schedule(e,now+step/2u,voice,note,vel);
+        if(s->length>80) schedule(e,now+step*3u/4u,voice,note,vel);
         break;
       }
       default:emit(ctx,voice,note,vel);break;
