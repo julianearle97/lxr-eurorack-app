@@ -41,6 +41,16 @@ int main(void) {
     assert(r.duck_gain > 0.75f);
     KickRumble_set(&r,44100.0f,0.7f,0.7f,25.f,180.f,0.0f);
     assert(r.duck_gain == 1.0f);
+    /* New bass body filter remains stable under full wet input and lower LP. */
+    KickRumble_init(&r,44100.0f);
+    KickRumble_set(&r,44100.0f,1.0f,0.8f,18.0f,35.0f,0.0f);
+    float peak=0.0f;
+    for(int i=0;i<44100*5;i++) {
+        float y=KickRumble_process(&r,i<2205 ? 0.15f*sinf(6.2831853f*55.0f*i/44100.0f):0.0f);
+        assert(isfinite(y) && y>=-1.0f && y<=1.0f);
+        if(fabsf(y)>peak) peak=fabsf(y);
+    }
+    assert(peak>0.0f);
     puts("kick rumble host tests passed");
     return 0;
 }
