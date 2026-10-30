@@ -36,6 +36,7 @@ void KickRumble_set(KickRumble *r, float sr, float level,
     lp_hz = clamp(lp_hz, hp_hz + 5.0f, sr * 0.45f);
     r->hp_coef = pole(hp_hz, sr);
     r->lp_coef = pole(lp_hz, sr);
+    r->bass_coef = pole(100.0f, sr);
     r->duck_amount = clamp(duck, 0.0f, 1.0f);
     /* 2 ms attack, ~150 ms exponential recovery, and 90 ms full-depth hold.
      * Keep the wet gain near zero at maximum duck, not merely a subtle dip. */
@@ -88,8 +89,7 @@ float KickRumble_process(KickRumble *r, float dry) {
     r->lp_state += r->lp_coef * (hp - r->lp_state);
     r->lp_state2 += r->lp_coef * (r->lp_state - r->lp_state2);
     /* Low bass reinforcement: filtered rumble at 100 Hz, never the dry kick. */
-    const float bass_coef = pole(100.0f, 44100.0f);
-    r->bass_state += bass_coef * (r->lp_state2 - r->bass_state);
+    r->bass_state += r->bass_coef * (r->lp_state2 - r->bass_state);
     if (r->duck_hold_left > 0) {
         --r->duck_hold_left;
         r->duck_gain += r->duck_attack_coef * (r->duck_target - r->duck_gain);
