@@ -109,6 +109,7 @@ add_library(lxr_engine OBJECT
     Src/Soundengine/Soundengine.c
     Src/Soundengine/SampleVoiceBank.c
     Src/Soundengine/SampleVoiceControl.c
+    Src/Soundengine/CvSidechainExperiment.c
     Src/Soundengine/UserSampleBank.c
     Src/Soundengine/TriggerProcessor.c
     Src/Soundengine/IdmTriggers.c
