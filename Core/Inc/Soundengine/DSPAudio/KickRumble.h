@@ -23,6 +23,8 @@ typedef struct {
     float hp_state, lp_state, duck_gain;
     float hp_coef, lp_coef, feedback, level, duck_amount;
     float duck_release_coef;
+    float duck_attack_coef, duck_target;
+    uint32_t duck_hold_left, duck_hold_length;
 } KickRumble;
 
 /* All values normalized [0, 1] except filter cutoff frequencies in Hz. */
