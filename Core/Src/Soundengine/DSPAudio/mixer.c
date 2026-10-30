@@ -14,6 +14,7 @@
 #include <Soundengine/ModMatrix_Processor.h>
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/mixer.h"
+#include "Soundengine/DSPAudio/KickRumble.h"
 #include "Soundengine/config.h"
 #include "Soundengine/AudioCodecManager.h"
 #include "Soundengine/DSPAudio/CymbalVoice.h"
@@ -35,6 +36,18 @@
 
 //-----------------------------------------------------------------------
 INDTCMZ uint8_t mixer_audioRouting[6];
+/* Drum 1-only mono rumble: general SRAM, never the DTCM region. */
+static KickRumble drum1Rumble;
+void mixer_setDrum1RumbleParams(uint8_t level, uint8_t decay, uint8_t lowpass, uint8_t duck)
+{
+    /* Fixed 25 Hz high-pass. LP maps approximately 60 Hz to 1000 Hz. */
+    const float lp = 60.0f * powf(1000.0f/60.0f, lowpass / 127.0f);
+    KickRumble_set(&drum1Rumble, 44100.0f, level / 127.0f, decay / 127.0f, 25.0f, lp, duck / 127.0f);
+}
+void mixer_triggerDrum1Rumble(void)
+{
+    KickRumble_trigger(&drum1Rumble);
+}
 //-----------------------------------------------------------------------
 #if USE_DECIMATOR
 INDTCMZ float mixer_decimation_rate[7];		/**<sets the sample rate decimation. 0..1 = full rate*/
@@ -57,6 +70,7 @@ void mixer_init()
 #endif
 
 	FxBus_init();
+	KickRumble_init(&drum1Rumble, 44100.0f);
 }
 //-----------------------------------------------------------------------
 IN_ITCM_RAM void mixer_decimateBlock(const uint8_t voiceNr, int16_t* buffer)
@@ -611,6 +625,12 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 	calcDrumVoiceSyncBlock(0, sampleData,OUTPUT_DMA_SIZE);
 	//decimate voice
 	mixer_decimateBlock(0,sampleData);
+	/* Post-voice, pre-routing: mono rumble follows Drum 1's existing output. */
+	for(uint32_t rumbleSample = 0; rumbleSample < OUTPUT_DMA_SIZE; rumbleSample++) {
+		const float dry = sampleData[rumbleSample] * (1.0f / 32768.0f);
+		const float wet = KickRumble_process(&drum1Rumble, dry);
+		sampleData[rumbleSample] = (int16_t)(wet * 32767.0f);
+	}
 	//copy to selected dma buffer
 #if USE_SQRT_LUT
 	mixer_addDataToOutput(mixer_audioRouting[0],squareRootLut[127-voiceArray[0].pan] ,squareRootLut[voiceArray[0].pan], sampleData,&output[pos],&output[pos+1],&output2[pos],&output2[pos+1], fxBusData);

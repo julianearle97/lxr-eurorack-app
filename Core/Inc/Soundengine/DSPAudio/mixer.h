@@ -38,6 +38,8 @@ enum
 	MIXER_ROUTING_FX_BUS,
 };
 
+void mixer_triggerDrum1Rumble(void);
+void mixer_setDrum1RumbleParams(uint8_t level, uint8_t decay, uint8_t lowpass, uint8_t duck);
 void mixer_init();
 void  mixer_calcNextSampleBlock(int16_t* output,int16_t* output2);
 

@@ -14,6 +14,7 @@
 
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/DrumVoice.h"
+#include "Soundengine/DSPAudio/mixer.h"
 #include "Soundengine/DSPAudio/Oscillator.h"
 #include "Soundengine/DSPAudio/random.h"
 #include "math.h"
@@ -130,6 +131,7 @@ void Drum_setCv1VOct(const uint8_t voiceNr, float oct)
 void Drum_trigger(const uint8_t voiceNr, const uint8_t vol, const uint8_t note)
 {
 
+	if(voiceNr == 0) mixer_triggerDrum1Rumble();
 	lfo_retrigger(voiceNr);
 
 	//update velocity modulation

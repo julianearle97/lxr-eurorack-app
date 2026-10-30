@@ -27,7 +27,7 @@
 #include "../Parameters.h"
 //-----------------------------------------------------------------
 //#define NUM_PAGES 12		
-#define NUM_SUB_PAGES 8	// a maximum of 8 subpages 
+#define NUM_SUB_PAGES 9	// a maximum of 8 subpages 
 #define MASK_PARAMETER 0x07
 
 #define MASK_PAGE 0xf8
@@ -277,6 +277,11 @@ enum NamesEnum
 	TEXT_1VOCT,
 	TEXT_CV_SAVE,
 	TEXT_MORPH_TARGET,
+	TEXT_RUMBLE_LEVEL,
+	TEXT_RUMBLE_DECAY,
+	TEXT_RUMBLE_LP,
+	TEXT_RUMBLE_DUCK,
+
 
 
 	NUM_NAMES
@@ -391,6 +396,10 @@ enum shortNamesEnum
 	SHORT_1VOCT,
 	SHORT_CV,
 	SHORT_MORPH_TARGET,
+	SHORT_RUMBLE_LEVEL,
+	SHORT_RUMBLE_DECAY,
+	SHORT_RUMBLE_LP,
+	SHORT_RUMBLE_DUCK,
 
 	
 };
@@ -524,7 +533,11 @@ enum longNamesEnum
 	LONG_SRC,
 	LONG_1VOCT,
 	LONG_CV,
-	LONG_MORPH_TARGET
+	LONG_MORPH_TARGET,
+	LONG_RUMBLE_LEVEL,
+	LONG_RUMBLE_DECAY,
+	LONG_RUMBLE_LP,
+	LONG_RUMBLE_DUCK
 	
 };
 
@@ -627,9 +640,9 @@ enum Datatypes
 };
 
 //-----------------------------------------------------------------
-extern const enum Datatypes parameter_dtypes[NUM_PARAMS];
+extern const enum Datatypes parameter_dtypes[NUM_CUSTOM_PARAMS];
 extern uint8_t mainParameters[NUM_KIT_SLOTS][END_OF_SOUND_PARAMETERS];		// keeps all kits from sd card in memory
-extern uint8_t activeParameters[NUM_PARAMS];					// keeps the currently used kit in memory -> editBuffer
+extern uint8_t activeParameters[NUM_CUSTOM_PARAMS];					// keeps the currently used kit in memory -> editBuffer
 //extern uint8_t morphParameters[END_OF_SOUND_PARAMETERS];
 //extern uint8_t *morphParameters;
 //extern uint8_t abs_pot_Parameter_position[NUM_PARAMS];

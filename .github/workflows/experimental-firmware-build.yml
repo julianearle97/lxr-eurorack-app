@@ -1,0 +1,32 @@
+name: Experimental LXR firmware build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/drum1-mono-rumble
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi python3
+      - name: Run host DSP regression test
+        run: |
+          cc -O2 -Wall -Wextra -ICore/Inc tests/kick_rumble_host.c Core/Src/Soundengine/DSPAudio/KickRumble.c -lm -o /tmp/lxr-kick-rumble-test
+          /tmp/lxr-kick-rumble-test
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release
+      - name: Inspect ELF size
+        run: |
+          find build/release -name '*.elf' -exec arm-none-eabi-size -A {} \;
+      - name: Upload experimental firmware image (first hardware test)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lxr-custom-rumble-v1.51.99-experimental
+          path: build/release/LXRE*.img
+          if-no-files-found: error

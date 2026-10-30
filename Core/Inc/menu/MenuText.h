@@ -524,6 +524,10 @@ const char shortNames[][4]  =
 	{"cv"},
 	{"mtg"},
 
+	{"Lvl"},
+	{"Dcy"},
+	{"LPF"},
+	{"Dck"},
 };
 //-----------------------------------------------------------------
 // These correspond with the catNamesEnum in menu.h
@@ -658,6 +662,10 @@ const char longNames[][16] =
 	{"1V/Oct"},
 	{"CV Save"},
 	{"MrphTrgt"},
+	{"Rumble Lvl"},
+	{"Rumble Decay"},
+	{"Rumble LP"},
+	{"Rumble Duck"},
 };
 
 
