@@ -34,14 +34,14 @@ float cv1_capture_next(void){
     int32_t goal=131072+(error*64);
     if(goal<32768)goal=32768;
     if(goal>1048576)goal=1048576;
-    step_q16+=(uint32_t)((goal-(int32_t)step_q16)/256);
+    step_q16=(uint32_t)((int32_t)step_q16+(goal-(int32_t)step_q16)/256);
     if(available>=2u){
         const int32_t a=cv1_ring[tail&CV1_MASK];
         const int32_t b=cv1_ring[(tail+1u)&CV1_MASK];
         previous=(float)a + (float)(b-a)*(float)phase_q16/65536.0f;
         phase_q16+=step_q16;
         uint32_t advance=phase_q16>>16;
-        if(advance>available-2u) advance=available-2u;
+        if(advance>available-2u) {advance=available-2u;phase_q16=advance<<16;}
         tail+=advance;
         phase_q16-=advance<<16;
     }
