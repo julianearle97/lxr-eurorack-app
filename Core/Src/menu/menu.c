@@ -2822,6 +2822,7 @@ static uint8_t getMaxEntriesForMenu(uint8_t menuId)
 		return ppqInNames[0][0];
 	case MENU_MIX_FM:
 		return mixFmNames[0][0];
+	case MENU_SAMPLE_MODE: return sampleModeNames[0][0];
 
 	case MENU_FX:
 		return fxNames[0][0];
@@ -2927,6 +2928,7 @@ static void getMenuItemNameForValue(const uint8_t menuId, const uint8_t curParmV
 	case MENU_MIX_FM:
 		p=mixFmNames[curParmVal+1];
 		break;
+	case MENU_SAMPLE_MODE: p=sampleModeNames[curParmVal+1];break;
 
 	case MENU_FX:
 		p=fxNames[curParmVal+1];
