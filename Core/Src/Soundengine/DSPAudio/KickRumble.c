@@ -25,17 +25,34 @@ void KickRumble_set(KickRumble *r, float sr, float level,
     if (sr < 8000.0f) sr = 44100.0f;
     r->level = clamp(level, 0.0f, 1.0f);
     /* Near-unity orthogonal feedback gives a much longer, denser low-end tail. */
-    r->feedback = 0.78f + 0.208f * clamp(decay, 0.0f, 1.0f);
+    /* Map knob exponentially to approximately 0.12 .. 6.0 seconds RT60.
+     * For a ~80 ms delay circuit, -60 dB after rt60 is g^N=0.001.
+     * This is a much broader response than V2's 0.78 .. 0.988. */
+    const float d = clamp(decay, 0.0f, 1.0f);
+    const float rt60 = 0.12f * powf(50.0f, d);
+    const float mean_delay_s = ((2903.0f + 3371.0f + 4157.0f) / 3.0f) / sr;
+    r->feedback = expf(-6.9077553f * mean_delay_s / rt60);
     hp_hz = clamp(hp_hz, 15.0f, sr * 0.2f);
     lp_hz = clamp(lp_hz, hp_hz + 5.0f, sr * 0.45f);
     r->hp_coef = pole(hp_hz, sr);
     r->lp_coef = pole(lp_hz, sr);
     r->duck_amount = clamp(duck, 0.0f, 1.0f);
-    /* 100 ms release; eventually map this to kick timing. */
-    r->duck_release_coef = pole(10.0f, sr);
+    /* 5 ms duck attack, ~180 ms release, 45 ms fixed hold.
+     * Hold ensures a kick actually clears space in the rumble. */
+    r->duck_attack_coef = pole(200.0f, sr);
+    r->duck_release_coef = pole(5.5f, sr);
+    r->duck_hold_length = (uint32_t)(sr * 0.045f);
+    if (r->duck_amount == 0.0f) {
+        r->duck_hold_left = 0;
+        r->duck_target = 1.0f;
+        r->duck_gain = 1.0f;
+    }
 }
 void KickRumble_trigger(KickRumble *r) {
-    r->duck_gain = 1.0f - r->duck_amount;
+    if (r->duck_amount > 0.0f) {
+        r->duck_target = 1.0f - r->duck_amount;
+        r->duck_hold_left = r->duck_hold_length;
+    }
 }
 float KickRumble_process(KickRumble *r, float dry) {
     /* Always advance when enabled; disable bypass leaves dry unchanged. */
@@ -67,7 +84,12 @@ float KickRumble_process(KickRumble *r, float dry) {
     r->hp_state += r->hp_coef * (diffused - r->hp_state);
     float hp = diffused - r->hp_state;
     r->lp_state += r->lp_coef * (hp - r->lp_state);
-    r->duck_gain += r->duck_release_coef * (1.0f - r->duck_gain);
+    if (r->duck_hold_left > 0) {
+        --r->duck_hold_left;
+        r->duck_gain += r->duck_attack_coef * (r->duck_target - r->duck_gain);
+    } else {
+        r->duck_gain += r->duck_release_coef * (1.0f - r->duck_gain);
+    }
     /* Wet-only drive adds weight/harmonics; bounded to avoid runaway output. */
     const float thick = clamp(r->lp_state * 2.8f, -2.0f, 2.0f);
     const float saturated = thick / (1.0f + 0.35f * fabsf(thick));
