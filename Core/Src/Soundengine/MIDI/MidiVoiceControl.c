@@ -80,6 +80,9 @@ void voiceControl_queueTrigger(uint8_t voice, uint8_t note, uint8_t vel)
 
 void voiceControl_processQueue()
 {
+	/* Dispatch previously scheduled glitch events on the audio processing thread. */
+	idm_ensureInit();
+	Idm_tick(&idm,HAL_GetTick(),idm_emit,0);
 	if(voiceControlStarted)
 	{
 		for(int voice=0;voice<7;voice++)
