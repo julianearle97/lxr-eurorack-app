@@ -36,6 +36,12 @@
 
 //-----------------------------------------------------------------------
 INDTCMZ uint8_t mixer_audioRouting[6];
+/* Drum 1-only mono rumble: general SRAM, never the DTCM region. */
+static KickRumble drum1Rumble;
+void mixer_triggerDrum1Rumble(void)
+{
+    KickRumble_trigger(&drum1Rumble);
+}
 //-----------------------------------------------------------------------
 #if USE_DECIMATOR
 INDTCMZ float mixer_decimation_rate[7];		/**<sets the sample rate decimation. 0..1 = full rate*/
