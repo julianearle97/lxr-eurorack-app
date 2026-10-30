@@ -32,6 +32,7 @@
 #include "Soundengine/FxBus.h"
 #include "Soundengine/DSPAudio/mixer.h"
 #include "Soundengine/MIDI/MidiVoiceControl.h"
+#include "Soundengine/SampleVoiceControl.h"
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Soundengine/Soundengine.h"
 
@@ -50,6 +51,18 @@ void menu_applyIdm(void) {
     if(mode>6)mode=6;
     voiceControl_idmSetMaster(mode,activeParameters[PAR_IDM_MASTER_CHANCE],activeParameters[PAR_IDM_MASTER_AMOUNT],activeParameters[PAR_IDM_MASTER_LENGTH],0x7e);
     voiceControl_idmScope(mode ? 2 : 1);
+}
+/* Local custom sample settings, indexed after original factory and IDM parameters. */
+void menu_applySampleVoice(uint8_t voice) {
+    if(voice>=7)return;
+    const uint16_t first=PAR_SAMPLE_V1_MODE+4u*voice;
+    uint8_t slot=activeParameters[first+1];
+    if(slot>11)slot=11;
+    SampleVoiceControl_set(voice,activeParameters[first]!=0,slot,
+                           activeParameters[first+2],activeParameters[first+3]);
+}
+void menu_applyAllSamples(void){
+    for(uint8_t i=0;i<7;i++) menu_applySampleVoice(i);
 }
 uint8_t display_refresh_state = 0;
 uint8_t display_needs_refresh = 0;
@@ -866,6 +879,12 @@ void menu_init()
 	//frontPanel_sendData(SEQ_CC,SEQ_ROLL_RATE,8); //value is initialized in cortex firmware
 
 	activeParameters[PAR_BPM] = 120;
+	for(unsigned i=0;i<7;i++) {
+		activeParameters[PAR_SAMPLE_V1_MODE+i*4] = 0;
+		activeParameters[PAR_SAMPLE_V1_SLOT+i*4] = 0;
+		activeParameters[PAR_SAMPLE_V1_PITCH+i*4] = 64;
+		activeParameters[PAR_SAMPLE_V1_VOLUME+i*4] = 127;
+	}
 	/* Factory kits start with the custom effect disabled. */
 	activeParameters[PAR_RUMBLE_LEVEL] = 0;
 	activeParameters[PAR_RUMBLE_DECAY] = 64;
@@ -3346,6 +3365,12 @@ static void menu_encoderChangeParameter(int8_t inc)
         menu_applyIdm();
         return;
     }
+	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
+        const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
+        if(offset%4==1 && *paramValue>11)*paramValue=11;
+        menu_applySampleVoice((uint8_t)(offset/4));
+        return;
+    }
 	if (paramNr >= PAR_RUMBLE_LEVEL && paramNr <= PAR_RUMBLE_DUCK) {
 		mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL], activeParameters[PAR_RUMBLE_DECAY], activeParameters[PAR_RUMBLE_LP], activeParameters[PAR_RUMBLE_DUCK]);
 		return;
@@ -3404,6 +3429,21 @@ static void menu_moveToMenuItem(int8_t inc)
             if(inc < 0 && page == 1 && active == 0) {
                 menuIndex = 2; return;
             }
+        }
+    }
+	/* Scroll off the Oscillator's fourth parameter to reach the sample page;
+       press the encoder as usual to edit Mode/Sample/Pitch/Volume. */
+    if(buttonHandler_getMode()!=SELECT_MODE_MOD && menu_activePage<=VOICE7_PAGE) {
+        const uint8_t page=menuIndex>>PAGE_SHIFT;
+        const uint8_t pos=menuIndex&MASK_PARAMETER;
+        const uint8_t samplePage=(menu_activePage==VOICE1_PAGE)?10:9;
+        if(inc>0 && page==0 && pos==3) {
+            menuIndex=(uint8_t)(samplePage<<PAGE_SHIFT);
+            return;
+        }
+        if(inc<0 && page==samplePage && pos==0) {
+            menuIndex=3;
+            return;
         }
     }
 	// clamp encoder to +/- 1 to make logic simpler
@@ -4442,6 +4482,12 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
         if(((paramNr - PAR_IDM_V1_MODE)%4)==0 && activeParameters[paramNr]>6)
             activeParameters[paramNr]=6;
         menu_applyIdm();
+        return 1;
+    }
+	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
+        const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
+        if(offset%4==1 && activeParameters[paramNr]>11) activeParameters[paramNr]=11;
+        menu_applySampleVoice((uint8_t)(offset/4));
         return 1;
     }
 	/* Custom rumble knobs are local DSP controls, not front-panel MIDI/global params. */
