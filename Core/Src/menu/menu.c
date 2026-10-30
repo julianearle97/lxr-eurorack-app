@@ -57,7 +57,9 @@ void menu_applySampleVoice(uint8_t voice) {
     if(voice>=7)return;
     const uint16_t first=PAR_SAMPLE_V1_MODE+4u*voice;
     uint8_t slot=activeParameters[first+1];
-    if(slot>11)slot=11;
+    if(slot<1)slot=1;
+    if(slot>12)slot=12;
+    slot--;
     SampleVoiceControl_set(voice,activeParameters[first]!=0,slot,
                            activeParameters[first+2],activeParameters[first+3]);
 }
@@ -679,13 +681,13 @@ const enum Datatypes PROGMEM parameter_dtypes[NUM_SAMPLE_PARAMS] = {
 	DTYPE_0B15, DTYPE_0B100, DTYPE_0B127, DTYPE_0B127,
 	DTYPE_0B15, DTYPE_0B100, DTYPE_0B127, DTYPE_0B127,
 	DTYPE_0B15, DTYPE_0B100, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_0B15, DTYPE_0B127, DTYPE_0B127
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127,
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_1B16, DTYPE_0B127, DTYPE_0B127
 };
 
 
@@ -881,7 +883,7 @@ void menu_init()
 	activeParameters[PAR_BPM] = 120;
 	for(unsigned i=0;i<7;i++) {
 		activeParameters[PAR_SAMPLE_V1_MODE+i*4] = 0;
-		activeParameters[PAR_SAMPLE_V1_SLOT+i*4] = 0;
+		activeParameters[PAR_SAMPLE_V1_SLOT+i*4] = 1;
 		activeParameters[PAR_SAMPLE_V1_PITCH+i*4] = 64;
 		activeParameters[PAR_SAMPLE_V1_VOLUME+i*4] = 127;
 	}
@@ -3367,7 +3369,7 @@ static void menu_encoderChangeParameter(int8_t inc)
     }
 	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
         const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
-        if(offset%4==1 && *paramValue>11)*paramValue=11;
+        if(offset%4==1 && *paramValue>12)*paramValue=11;
         menu_applySampleVoice((uint8_t)(offset/4));
         return;
     }
@@ -4486,7 +4488,7 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
     }
 	if(paramNr >= PAR_SAMPLE_V1_MODE && paramNr <= PAR_SAMPLE_V7_VOLUME) {
         const uint16_t offset=paramNr-PAR_SAMPLE_V1_MODE;
-        if(offset%4==1 && activeParameters[paramNr]>11) activeParameters[paramNr]=11;
+        if(offset%4==1 && activeParameters[paramNr]>12) activeParameters[paramNr]=11;
         menu_applySampleVoice((uint8_t)(offset/4));
         return 1;
     }
