@@ -32,6 +32,14 @@ jobs:
         run: |
           cc -O2 -std=c11 -Wall -Wextra -ICore/Inc tests/sample_voice_host.c Core/Src/Soundengine/SampleVoiceBank.c -lm -o /tmp/sample-test
           /tmp/sample-test
+      - name: Require user's 12 actual samples before publishing an image
+        run: |
+          if grep -Fq 'lxr_custom_samples[1]' Core/Src/Soundengine/UserSampleBank.c; then
+            echo "::error::Custom sample bank is still an empty placeholder; upload UserSampleBank.c first."
+            exit 1
+          fi
+          grep -Fq 'lxr_custom_sample_offsets[12]' Core/Src/Soundengine/UserSampleBank.c
+          grep -Fq 'lxr_custom_sample_lengths[12]' Core/Src/Soundengine/UserSampleBank.c
       - name: Configure
         run: cmake --preset release
       - name: Build
