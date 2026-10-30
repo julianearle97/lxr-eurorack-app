@@ -14,6 +14,7 @@
 
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/MIDI/MidiVoiceControl.h"
+#include "Soundengine/IdmTriggers.h"
 #include "Soundengine/DSPAudio/DrumVoice.h"
 #include "Soundengine/DSPAudio/Snare.h"
 #include "Soundengine/DSPAudio/HiHat.h"
@@ -28,6 +29,33 @@
 //#include "LCD_driver.h"
 
 uint8_t voiceStatus[NUM_DRUM_VOICES];
+static IdmEngine idm;
+static uint8_t idmInitialized=0;
+static void idm_emit(void *ctx,uint8_t voice,uint8_t note,uint8_t vel) {
+    (void)ctx;
+    if(buttonHandler_getMutedVoices() & (1u<<voice)) return;
+    if(voice<3) Drum_trigger(voice,vel,note);
+    else if(voice==3) Snare_trigger(vel,note);
+    else if(voice==4) Cymbal_trigger(vel,note);
+    else if(voice<7) HiHat_trigger(vel,voice-5,note);
+    if(!buttonHandler_getDrumButton()) led_pulseLed(LED_2+voice);
+}
+void voiceControl_idmSetVoice(uint8_t voice,uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length) {
+    if(voice>=IDM_VOICES) return;
+    idm.voice[voice]=(IdmSettings){mode,chance,length,amount,(uint8_t)(mode!=IDM_OFF)};
+}
+void voiceControl_idmSetMaster(uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length,uint8_t mask) {
+    idm.master=(IdmSettings){mode,chance,length,amount,(uint8_t)(mode!=IDM_OFF)};
+    idm.master_mask=mask & 0x3f;
+}
+void voiceControl_idmScope(uint8_t scope) {
+    idm.scope=(scope==2)? IDM_MASTER:IDM_INDEPENDENT;
+    if(!scope) {
+       for(unsigned i=0;i<IDM_VOICES;i++) idm.voice[i].enabled=0;
+       idm.master.enabled=0;
+    }
+}
+
 
 static uint8_t active_voices=0;	// which voices are currently playing a note
 //----------------------------------------------------------------
@@ -61,20 +89,8 @@ void voiceControl_processQueue()
 				if((buttonHandler_getMutedVoices()  & (1 << voice)) == 0)
 				{
 
-					if(voice < 3)
-						Drum_trigger(voice, voiceQueueVel[voice], voiceQueueNote[voice]);
-					else if(voice < 4)
-						Snare_trigger(voiceQueueVel[voice], voiceQueueNote[voice]);
-					else if(voice < 5)
-						Cymbal_trigger(voiceQueueVel[voice], voiceQueueNote[voice]);
-					else
-						HiHat_trigger(voiceQueueVel[voice],voice-5,voiceQueueNote[voice]);
-
-					//only flash LEDs when not in voice select mode (DRUM)
-					if(!buttonHandler_getDrumButton())
-					{
-						led_pulseLed(LED_2+voice);
-					}
+					if(voice<6) Idm_input(&idm,HAL_GetTick(),(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice],idm_emit,0);
+                    else idm_emit(0,(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice]);
 				}
 			}
 		}
