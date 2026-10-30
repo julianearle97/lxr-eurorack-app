@@ -31,10 +31,26 @@
 #include "front.h"
 #include "Soundengine/FxBus.h"
 #include "Soundengine/DSPAudio/mixer.h"
+#include "Soundengine/MIDI/MidiVoiceControl.h"
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Soundengine/Soundengine.h"
 
 
+/* Four controls per voice: Mode, Chance, Amount, Length.
+ * Master mode overrides voices 2-7; Drum 1 remains independent for stability.
+ * Setting master mode to OFF restores all independent settings. */
+static void menu_applyIdm(void) {
+    for(unsigned v=0;v<7;v++) {
+        uint16_t base=PAR_IDM_V1_MODE + v*4;
+        uint8_t mode=activeParameters[base];
+        if(mode>6) mode=6;
+        voiceControl_idmSetVoice(v,mode,activeParameters[base+1],activeParameters[base+2],activeParameters[base+3]);
+    }
+    uint8_t mode=activeParameters[PAR_IDM_MASTER_MODE];
+    if(mode>6)mode=6;
+    voiceControl_idmSetMaster(mode,activeParameters[PAR_IDM_MASTER_CHANCE],activeParameters[PAR_IDM_MASTER_AMOUNT],activeParameters[PAR_IDM_MASTER_LENGTH],0x7e);
+    voiceControl_idmScope(mode ? 2 : 1);
+}
 uint8_t display_refresh_state = 0;
 uint8_t display_needs_refresh = 0;
 uint8_t display_needs_clear_all = 0;
@@ -3312,6 +3328,11 @@ static void menu_encoderChangeParameter(int8_t inc)
 	} //parameter_dtypes[paramNr] & 0x0F
 
 
+	if(paramNr >= PAR_IDM_V1_MODE && paramNr <= PAR_IDM_MASTER_LENGTH) {
+        if(((paramNr - PAR_IDM_V1_MODE)%4)==0 && *paramValue>6) *paramValue=6;
+        menu_applyIdm();
+        return;
+    }
 	if (paramNr >= PAR_RUMBLE_LEVEL && paramNr <= PAR_RUMBLE_DUCK) {
 		mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL], activeParameters[PAR_RUMBLE_DECAY], activeParameters[PAR_RUMBLE_LP], activeParameters[PAR_RUMBLE_DUCK]);
 		return;
@@ -4404,6 +4425,12 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
 		activeParameters[paramNr] = dtypeValue;
 	}
 
+	if(paramNr >= PAR_IDM_V1_MODE && paramNr <= PAR_IDM_MASTER_LENGTH) {
+        if(((paramNr - PAR_IDM_V1_MODE)%4)==0 && activeParameters[paramNr]>6)
+            activeParameters[paramNr]=6;
+        menu_applyIdm();
+        return 1;
+    }
 	/* Custom rumble knobs are local DSP controls, not front-panel MIDI/global params. */
 	if(paramNr >= PAR_RUMBLE_LEVEL && paramNr <= PAR_RUMBLE_DUCK) {
 		mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL],
