@@ -67,6 +67,8 @@ extern uint8_t menu_loadedPresetNr[NUM_CURRENT];
 extern uint32_t sucessTimer;
 
 void menu_applyIdm(void);
+void menu_applySampleVoice(uint8_t voice);
+void menu_applyAllSamples(void);
 void menu_setShownPattern(uint8_t patternNr);
 uint8_t menu_getViewedPattern();
 
