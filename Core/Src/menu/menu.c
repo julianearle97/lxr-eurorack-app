@@ -269,7 +269,7 @@ const Name valueNames[NUM_NAMES] =
 
 //---------------------------------------------------------------
 // Parameter types. These correspond with ParamEnums and entries in parameter_values
-const enum Datatypes PROGMEM parameter_dtypes[NUM_CUSTOM_PARAMS] = {
+const enum Datatypes PROGMEM parameter_dtypes[NUM_IDM_PARAMS] = {
 	    /*PAR_NONE*/ 			DTYPE_0B127,							// 0
 	    /*PAR_OSC_WAVE_DRUM1*/ 	DTYPE_MENU | (MENU_WAVEFORM<<8),
 	    /*PAR_OSC_WAVE_DRUM2*/ 	DTYPE_MENU | (MENU_WAVEFORM<<8),
@@ -766,7 +766,7 @@ static uint8_t lastEncoderButton = 0;		/**< stores the state of the encoder butt
 /** array holding all the available parameter values*/
 uint8_t mainParameters[NUM_KIT_SLOTS][END_OF_SOUND_PARAMETERS];
 //uint8_t abs_pot_Parameter_position[NUM_PARAMS];
-uint8_t activeParameters[NUM_CUSTOM_PARAMS];
+uint8_t activeParameters[NUM_IDM_PARAMS];
 //uint8_t morphParameters[END_OF_SOUND_PARAMETERS];/**< a second array for sound x-fade to another preset*/
 //uint8_t *morphParameters;
 //-----------------------------------------------------------------
