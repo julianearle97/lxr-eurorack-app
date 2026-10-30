@@ -18,7 +18,6 @@
 #include "buttonHandler.h"
 #include "encoder.h"
 #include "IO/adcPots.h"
-#include "Soundengine/CvAudioCapture.h"
 #include "Preset/PresetManager.h"
 #include "Soundengine/Soundengine.h"
 #include "Soundengine/DSPAudio/random.h"
@@ -51,8 +50,6 @@ TIM_HandleTypeDef htim14;
 
 float debugWatch = 0;
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){if(hadc->Instance==ADC1)cv_audio_capture_half(0);}
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc){if(hadc->Instance==ADC1)cv_audio_capture_half(1);}
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void init_gpio(void);
@@ -231,7 +228,7 @@ int main(void)
 
 
   //we have to read out the pots once to have a defined state before loading the preset data
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)cv_adc_dma, CV_ADC_DMA_SAMPLES);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
   adc_checkPots();
   adc_checkPots();
 
