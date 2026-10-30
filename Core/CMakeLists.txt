@@ -110,6 +110,7 @@ add_library(lxr_engine OBJECT
     Src/Soundengine/SampleVoiceBank.c
     Src/Soundengine/SampleVoiceControl.c
     Src/Soundengine/UserSampleBank.c
+    Src/Soundengine/OldRideSample.c
     Src/Soundengine/TriggerProcessor.c
     Src/Soundengine/IdmTriggers.c
 )
