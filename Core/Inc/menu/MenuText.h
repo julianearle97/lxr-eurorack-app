@@ -46,6 +46,7 @@
 #define MENU_CV_SAVE		27
 #define MENU_AUDIO_OUT_FX	28
 #define MENU_SAMPLE_MODE 29
+#define MENU_SAMPLE_SLOT 30
 
 //-----------------------------------------------------------------
 // Shared texts. Reduce mem usage by pooling common text
@@ -399,6 +400,12 @@ const char midiRoutingNames[][6] =
 };
 //-----------------------------------------------------------------
 const char sampleModeNames[][7] = { {2,0}, {"SYN"}, {"SMP"} };
+/* Three-character LCD labels corresponding to user WAV bank slots 1..12. */
+const char sampleSlotNames[][4] = {
+  {13,0,0,0}, {"OH1"}, {"LK1"}, {"SN1"}, {"CR1"},
+  {"CP1"}, {"HT3"}, {"HT2"}, {"RID"}, {"CHH"},
+  {"CK1"}, {"SN2"}, {"CP2"}
+};
 const char mixFmNames[][6] =
 {
 		{2},	// number of entries
