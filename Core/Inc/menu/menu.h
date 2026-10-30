@@ -27,7 +27,7 @@
 #include "../Parameters.h"
 //-----------------------------------------------------------------
 //#define NUM_PAGES 12		
-#define NUM_SUB_PAGES 10	// a maximum of 8 subpages 
+#define NUM_SUB_PAGES 11	// a maximum of 8 subpages 
 #define MASK_PARAMETER 0x07
 
 #define MASK_PAGE 0xf8
@@ -282,6 +282,7 @@ enum NamesEnum
 	TEXT_RUMBLE_DECAY,
 	TEXT_RUMBLE_LP,
 	TEXT_RUMBLE_DUCK,
+	TEXT_SAMPLE_MODE, TEXT_SAMPLE_SLOT, TEXT_SAMPLE_PITCH, TEXT_SAMPLE_VOLUME,
 
 
 
@@ -401,6 +402,7 @@ enum shortNamesEnum
 	SHORT_RUMBLE_DECAY,
 	SHORT_RUMBLE_LP,
 	SHORT_RUMBLE_DUCK,
+	SHORT_SAMPLE_MODE, SHORT_SAMPLE_SLOT, SHORT_SAMPLE_PITCH, SHORT_SAMPLE_VOLUME,
 
 	
 };
@@ -538,7 +540,8 @@ enum longNamesEnum
 	LONG_RUMBLE_LEVEL,
 	LONG_RUMBLE_DECAY,
 	LONG_RUMBLE_LP,
-	LONG_RUMBLE_DUCK
+	LONG_RUMBLE_DUCK,
+	LONG_SAMPLE_MODE, LONG_SAMPLE_SLOT, LONG_SAMPLE_PITCH, LONG_SAMPLE_VOLUME
 	
 };
 
