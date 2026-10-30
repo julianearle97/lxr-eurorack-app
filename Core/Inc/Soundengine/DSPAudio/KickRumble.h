@@ -13,13 +13,15 @@
 #define KICK_RUMBLE_D2 3371
 #define KICK_RUMBLE_D3 4157
 #define KICK_RUMBLE_AP 421
+#define KICK_RUMBLE_PREDELAY 1764 /* 40 ms at 44.1 kHz */
 
 typedef struct {
     float delay1[KICK_RUMBLE_D1];
     float delay2[KICK_RUMBLE_D2];
     float delay3[KICK_RUMBLE_D3];
     float diffuser[KICK_RUMBLE_AP];
-    uint32_t p1, p2, p3, pa;
+    float predelay[KICK_RUMBLE_PREDELAY];
+    uint32_t p1, p2, p3, pa, pp;
     float hp_state, lp_state, duck_gain;
     float hp_coef, lp_coef, feedback, level, duck_amount;
     float duck_release_coef;
