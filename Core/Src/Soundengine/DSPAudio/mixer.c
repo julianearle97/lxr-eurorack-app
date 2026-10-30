@@ -749,7 +749,8 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
-	cv_sidechain_mix(output2,OUTPUT_DMA_SIZE);
+	/* DAC2 left = dedicated physical output 3; never touch main DAC1. */
+	cv_sidechain_mix(output,OUTPUT_DMA_SIZE);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
