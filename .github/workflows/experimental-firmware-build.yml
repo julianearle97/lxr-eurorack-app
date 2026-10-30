@@ -13,6 +13,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi python3
+      - name: Run host DSP regression test
+        run: |
+          cc -O2 -Wall -Wextra -ICore/Inc tests/kick_rumble_host.c Core/Src/Soundengine/DSPAudio/KickRumble.c -lm -o /tmp/lxr-kick-rumble-test
+          /tmp/lxr-kick-rumble-test
       - name: Configure
         run: cmake --preset release
       - name: Build
