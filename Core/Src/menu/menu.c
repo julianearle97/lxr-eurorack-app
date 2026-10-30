@@ -3346,6 +3346,32 @@ static void menu_moveToMenuItem(int8_t inc)
 	uint8_t param;
 	uint8_t allowedSkips	=3; //how many skip items do we allow in a row
 
+    /* A second four-control Mix page per drum; Perform has its own master page. */
+    if(buttonHandler_getMode()!=SELECT_MODE_MOD) {
+        const uint8_t active = menuIndex & MASK_PARAMETER;
+        const uint8_t page = menuIndex >> PAGE_SHIFT;
+        if(menu_activePage <= VOICE7_PAGE) {
+            if(inc > 0 && page == 6 && active == 4) {
+                menuIndex = (uint8_t)((8 << PAGE_SHIFT)); return;
+            }
+            if(menu_activePage == VOICE1_PAGE && inc > 0 && page == 8 && active == 3) {
+                menuIndex = (uint8_t)(9 << PAGE_SHIFT); return;
+            }
+            if(inc < 0 && page == 8 && active == 0) {
+                menuIndex = (uint8_t)((6 << PAGE_SHIFT) | 4); return;
+            }
+            if(menu_activePage == VOICE1_PAGE && inc < 0 && page == 9 && active == 0) {
+                menuIndex = (uint8_t)((8 << PAGE_SHIFT) | 3); return;
+            }
+        } else if(menu_activePage == PERF_PAGE) {
+            if(inc > 0 && page == 0 && active == 2) {
+                menuIndex = (uint8_t)(1 << PAGE_SHIFT); return;
+            }
+            if(inc < 0 && page == 1 && active == 0) {
+                menuIndex = 2; return;
+            }
+        }
+    }
 	// clamp encoder to +/- 1 to make logic simpler
 	inc = inc>0?1:-1;
 
