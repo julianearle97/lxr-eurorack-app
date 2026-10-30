@@ -5,6 +5,7 @@ on:
     branches:
       - feature/drum1-mono-rumble
       - feature/drum1-mono-rumble-v2
+      - feature/drum1-mono-rumble-v3
 jobs:
   compile:
     runs-on: ubuntu-24.04
@@ -28,6 +29,6 @@ jobs:
       - name: Upload experimental firmware image (first hardware test)
         uses: actions/upload-artifact@v4
         with:
-          name: lxr-custom-rumble-v1.52.0-v2-experimental
+          name: lxr-custom-rumble-v1.53.0-v3-experimental
           path: build/release/LXRE*.img
           if-no-files-found: error
