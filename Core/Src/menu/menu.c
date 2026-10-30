@@ -39,7 +39,7 @@
 /* Four controls per voice: Mode, Chance, Amount, Length.
  * Master mode overrides voices 2-7; Drum 1 remains independent for stability.
  * Setting master mode to OFF restores all independent settings. */
-static void menu_applyIdm(void) {
+void menu_applyIdm(void) {
     for(unsigned v=0;v<7;v++) {
         uint16_t base=PAR_IDM_V1_MODE + v*4;
         uint8_t mode=activeParameters[base];
