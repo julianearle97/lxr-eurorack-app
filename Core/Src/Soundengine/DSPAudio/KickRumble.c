@@ -37,11 +37,11 @@ void KickRumble_set(KickRumble *r, float sr, float level,
     r->hp_coef = pole(hp_hz, sr);
     r->lp_coef = pole(lp_hz, sr);
     r->duck_amount = clamp(duck, 0.0f, 1.0f);
-    /* 5 ms duck attack, ~180 ms release, 45 ms fixed hold.
-     * Hold ensures a kick actually clears space in the rumble. */
-    r->duck_attack_coef = pole(200.0f, sr);
-    r->duck_release_coef = pole(5.5f, sr);
-    r->duck_hold_length = (uint32_t)(sr * 0.045f);
+    /* 2 ms attack, 250 ms exponential recovery, and 90 ms full-depth hold.
+     * Keep the wet gain near zero at maximum duck, not merely a subtle dip. */
+    r->duck_attack_coef = pole(500.0f, sr);
+    r->duck_release_coef = pole(4.0f, sr);
+    r->duck_hold_length = (uint32_t)(sr * 0.090f);
     if (r->duck_amount == 0.0f) {
         r->duck_hold_left = 0;
         r->duck_target = 1.0f;
@@ -50,7 +50,9 @@ void KickRumble_set(KickRumble *r, float sr, float level,
 }
 void KickRumble_trigger(KickRumble *r) {
     if (r->duck_amount > 0.0f) {
-        r->duck_target = 1.0f - r->duck_amount;
+        /* Nonlinear perceived depth: 50% knob means ~75% attenuation. */
+        const float remaining = 1.0f - r->duck_amount;
+        r->duck_target = remaining * remaining;
         r->duck_hold_left = r->duck_hold_length;
     }
 }
@@ -90,8 +92,12 @@ float KickRumble_process(KickRumble *r, float dry) {
     } else {
         r->duck_gain += r->duck_release_coef * (1.0f - r->duck_gain);
     }
+    /* 40 ms wet-only pre-delay creates a distinct low-end bounce after the kick. */
+    const float delayedWet = r->predelay[r->pp];
+    r->predelay[r->pp] = r->lp_state;
+    if (++r->pp == KICK_RUMBLE_PREDELAY) r->pp = 0;
     /* Wet-only drive adds weight/harmonics; bounded to avoid runaway output. */
-    const float thick = clamp(r->lp_state * 2.8f, -2.0f, 2.0f);
+    const float thick = clamp(delayedWet * 2.8f, -2.0f, 2.0f);
     const float saturated = thick / (1.0f + 0.35f * fabsf(thick));
     return clamp(dry + r->level * r->duck_gain * saturated, -1.0f, 1.0f);
 }
