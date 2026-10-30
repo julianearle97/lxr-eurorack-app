@@ -86,6 +86,10 @@ float KickRumble_process(KickRumble *r, float dry) {
     r->hp_state += r->hp_coef * (diffused - r->hp_state);
     float hp = diffused - r->hp_state;
     r->lp_state += r->lp_coef * (hp - r->lp_state);
+    r->lp_state2 += r->lp_coef * (r->lp_state - r->lp_state2);
+    /* Low bass reinforcement: filtered rumble at 100 Hz, never the dry kick. */
+    const float bass_coef = pole(100.0f, 44100.0f);
+    r->bass_state += bass_coef * (r->lp_state2 - r->bass_state);
     if (r->duck_hold_left > 0) {
         --r->duck_hold_left;
         r->duck_gain += r->duck_attack_coef * (r->duck_target - r->duck_gain);
@@ -94,7 +98,7 @@ float KickRumble_process(KickRumble *r, float dry) {
     }
     /* 40 ms wet-only pre-delay creates a distinct low-end bounce after the kick. */
     const float delayedWet = r->predelay[r->pp];
-    r->predelay[r->pp] = r->lp_state;
+    r->predelay[r->pp] = 1.25f * r->lp_state2 + 1.0f * r->bass_state;
     if (++r->pp == KICK_RUMBLE_PREDELAY) r->pp = 0;
     /* Wet-only drive adds weight/harmonics; bounded to avoid runaway output. */
     const float thick = clamp(delayedWet * 2.8f, -2.0f, 2.0f);
