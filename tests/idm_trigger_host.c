@@ -9,7 +9,7 @@ int main(void) {
     IdmEngine e; Idm_init(&e);
     Idm_input(&e,0,0,60,100,emit,0);
     assert(events==1 && voice_last==0); /* default transparent */
-    e.voice[0]=(IdmSettings){IDM_BURST,100,1,127,1};
+    e.voice[0]=(IdmSettings){IDM_BURST,100,127,127,1};
     events=0;Idm_input(&e,100,0,60,100,emit,0);
     for(unsigned t=100;t<300;t++)Idm_tick(&e,t,emit,0);
     assert(events==8);
