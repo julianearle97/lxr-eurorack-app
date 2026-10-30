@@ -162,6 +162,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 			TEXT_RUMBLE_LEVEL, TEXT_RUMBLE_DECAY, TEXT_RUMBLE_LP, TEXT_RUMBLE_DUCK, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
 			PAR_RUMBLE_LEVEL, PAR_RUMBLE_DECAY, PAR_RUMBLE_LP, PAR_RUMBLE_DUCK, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
 		},
+        /* Additional four-knob IDM trigger glitch page. */
+        {
+            TEXT_MODE, TEXT_PROBABILITY, TEXT_FX_GAIN, TEXT_PAT_LENGTH, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+            PAR_IDM_V1_MODE, PAR_IDM_V1_CHANCE, PAR_IDM_V1_AMOUNT, PAR_IDM_V1_LENGTH, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+        },
 	},
 	//page 2 - Voice 2 - drum
 	{
@@ -217,6 +222,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 			//PAR_VOLUME_MOD_ON_OFF2,	PAR_NONE,	PAR_NONE,	PAR_NONE
 		},
 
+        /* Additional four-knob IDM trigger glitch page. */
+        {
+            TEXT_MODE, TEXT_PROBABILITY, TEXT_FX_GAIN, TEXT_PAT_LENGTH, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+            PAR_IDM_V2_MODE, PAR_IDM_V2_CHANCE, PAR_IDM_V2_AMOUNT, PAR_IDM_V2_LENGTH, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+        },
 	},
 	//page 3 - Voice 3 - drum
 	{
@@ -272,6 +282,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 			//PAR_VOLUME_MOD_ON_OFF2,	PAR_NONE,	PAR_NONE,	PAR_NONE
 		},
 
+        /* Additional four-knob IDM trigger glitch page. */
+        {
+            TEXT_MODE, TEXT_PROBABILITY, TEXT_FX_GAIN, TEXT_PAT_LENGTH, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+            PAR_IDM_V3_MODE, PAR_IDM_V3_CHANCE, PAR_IDM_V3_AMOUNT, PAR_IDM_V3_LENGTH, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+        },
 	},
 	//page 4 - Voice 4 - snare/clap
 	{
@@ -316,6 +331,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 				PAR_FREQ_LFO4,	PAR_OFFSET_LFO4,	PAR_WAVE_LFO4,	PAR_RETRIGGER_LFO4, PAR_NONE,	PAR_NONE,	PAR_NONE,	PAR_NONE,
 		},
 
+        /* Additional four-knob IDM trigger glitch page. */
+        {
+            TEXT_MODE, TEXT_PROBABILITY, TEXT_FX_GAIN, TEXT_PAT_LENGTH, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+            PAR_IDM_V4_MODE, PAR_IDM_V4_CHANCE, PAR_IDM_V4_AMOUNT, PAR_IDM_V4_LENGTH, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+        },
 	},
 	//page 5 - Voice 5 - cymbal
 	{
@@ -412,6 +432,11 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 				PAR_FREQ_LFO6,	PAR_OFFSET_LFO6,	PAR_WAVE_LFO6,	PAR_RETRIGGER_LFO6, PAR_NONE,	PAR_NONE,	PAR_NONE,	PAR_NONE,
 		},
 
+        /* Additional four-knob IDM trigger glitch page. */
+        {
+            TEXT_MODE, TEXT_PROBABILITY, TEXT_FX_GAIN, TEXT_PAT_LENGTH, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY, TEXT_EMPTY,
+            PAR_IDM_V6_MODE, PAR_IDM_V6_CHANCE, PAR_IDM_V6_AMOUNT, PAR_IDM_V6_LENGTH, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+        },
 	},
 	//page 7 - Voice 6 - HH/Cymbal (FM) - same as voice 6 -> open hi hat
 	{
