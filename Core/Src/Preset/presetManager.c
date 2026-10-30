@@ -697,6 +697,9 @@ void preset_loadDrumsetRam(uint8_t presetNr, uint8_t isMorph, uint8_t sendImmedi
 		//activePresetNr = menu_currentPresetNr[menu_saveOptions.category];
 		preset_sendDrumsetParameters();
 	}
+	/* Apply SMP after factory parameter propagation; kit-load must not leave voices in SYN. */
+	if(!isMorph) sample_loadKit(presetNr);
+
 }
 //----------------------------------------------------
 void preset_saveDrumsetRam(uint8_t presetNr, uint8_t isMorph)
