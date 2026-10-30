@@ -649,9 +649,9 @@ enum Datatypes
 };
 
 //-----------------------------------------------------------------
-extern const enum Datatypes parameter_dtypes[NUM_SAMPLE_PARAMS];
+extern const enum Datatypes parameter_dtypes[NUM_CV_SIDECHAIN_PARAMS];
 extern uint8_t mainParameters[NUM_KIT_SLOTS][END_OF_SOUND_PARAMETERS];		// keeps all kits from sd card in memory
-extern uint8_t activeParameters[NUM_SAMPLE_PARAMS];					// keeps the currently used kit in memory -> editBuffer
+extern uint8_t activeParameters[NUM_CV_SIDECHAIN_PARAMS];					// keeps the currently used kit in memory -> editBuffer
 //extern uint8_t morphParameters[END_OF_SOUND_PARAMETERS];
 //extern uint8_t *morphParameters;
 //extern uint8_t abs_pot_Parameter_position[NUM_PARAMS];
