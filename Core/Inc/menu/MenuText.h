@@ -403,7 +403,7 @@ const char sampleModeNames[][7] = { {2,0}, {"SYN"}, {"SMP"} };
 /* Three-character LCD labels corresponding to user WAV bank slots 1..12. */
 const char sampleSlotNames[][4] = {
   {13,0,0,0}, {"OH1"}, {"LK1"}, {"SN1"}, {"CR1"},
-  {"CP1"}, {"HT3"}, {"HT2"}, {"RID"}, {"CHH"},
+  {"CP1"}, {"R01"}, {"HT2"}, {"RID"}, {"CHH"},
   {"CK1"}, {"SN2"}, {"CP2"}
 };
 const char mixFmNames[][6] =
