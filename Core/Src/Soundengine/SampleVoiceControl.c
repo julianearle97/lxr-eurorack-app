@@ -5,6 +5,7 @@
 #include "Soundengine/SampleVoiceBank.h"
 #include "Soundengine/UserSampleBank.h"
 #include <stdint.h>
+extern const int8_t lxr_old_ride[66150];
 static SampleVoiceBank bank;
 static uint8_t initialized=0;
 static uint8_t active_hat=5;
@@ -16,6 +17,8 @@ void SampleVoiceControl_init(void){
             SampleVoiceBank_assign(&bank,i,
               lxr_custom_samples+lxr_custom_sample_offsets[i],
               lxr_custom_sample_lengths[i]);
+    /* Former HT3 slot (6): old full-length ride; slot 8 is the updated ride. */
+    SampleVoiceBank_assign(&bank,5,lxr_old_ride,66150);
     initialized=1;
 }
 void SampleVoiceControl_set(uint8_t voice,uint8_t enabled,uint8_t slot,uint8_t pitch,uint8_t volume){
