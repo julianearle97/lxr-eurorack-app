@@ -3,7 +3,7 @@
  * Copyright (C) 2026. SPDX-License-Identifier: GPL-3.0-only
  * Prototype, not yet wired into audio routing or parameter storage.
  */
-#include "KickRumble.h"
+#include "Soundengine/DSPAudio/KickRumble.h"
 #include <math.h>
 #include <string.h>
 
