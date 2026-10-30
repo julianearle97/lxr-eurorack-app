@@ -16,7 +16,7 @@ int main(void) {
     e.voice[0]=(IdmSettings){IDM_DELAY,100,1,127,1};
     events=0; Idm_input(&e,500,0,60,100,emit,0);
     assert(events==0);
-    Idm_tick(&e,625,emit,0);
+    Idm_tick(&e,627,emit,0);
     assert(events==1);
     e.scope=IDM_MASTER;e.master=(IdmSettings){IDM_ROTATE,100,1,0,1};
     events=0;Idm_input(&e,1000,1,60,100,emit,0);
