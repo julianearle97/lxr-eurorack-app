@@ -1,0 +1,28 @@
+name: Experimental LXR firmware build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/drum1-mono-rumble
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi python3
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release
+      - name: Inspect ELF size
+        run: |
+          find build/release -name '*.elf' -exec arm-none-eabi-size -A {} \;
+      - name: Upload firmware for review (NOT hardware validated)
+        uses: actions/upload-artifact@v4
+        with:
+          name: untested-lxr-firmware-do-not-flash
+          path: build/release/LXRE*.img
+          if-no-files-found: error
