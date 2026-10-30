@@ -541,6 +541,7 @@ const char shortNames[][4]  =
 	{"slt"},
 	{"pit"},
 	{"vol"},
+    {"duk"}, {"hpf"}, {"ing"}, {"rel"}
 };
 //-----------------------------------------------------------------
 // These correspond with the catNamesEnum in menu.h
@@ -683,6 +684,7 @@ const char longNames[][16] =
 	{"Sample"},
 	{"Pitch"},
 	{"Volume"},
+    {"Duck Amt"}, {"Highpass"}, {"InputGain"}, {"Release"}
 };
 
 
