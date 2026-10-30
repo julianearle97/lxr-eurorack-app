@@ -18,6 +18,7 @@
 #include "buttonHandler.h"
 #include "encoder.h"
 #include "IO/adcPots.h"
+#include "Soundengine/Cv1DedicatedCapture.h"
 #include "Preset/PresetManager.h"
 #include "Soundengine/Soundengine.h"
 #include "Soundengine/DSPAudio/random.h"
@@ -50,6 +51,8 @@ TIM_HandleTypeDef htim14;
 
 float debugWatch = 0;
 
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *h){if(h->Instance==ADC1) cv1_capture_dma_half(0);}
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *h){if(h->Instance==ADC1) cv1_capture_dma_half(1);}
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void init_gpio(void);
@@ -228,9 +231,8 @@ int main(void)
 
 
   //we have to read out the pots once to have a defined state before loading the preset data
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
-  adc_checkPots();
-  adc_checkPots();
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)cv1_dma_samples, CV1_DMA_COUNT);
+  /* Knobs frozen in dedicated ADC test. */
 
   CV_Init();
 
@@ -469,7 +471,7 @@ voiceControl_start();
 	//  menu_tick();
 	  CV_process();
 	  soundengine_process();
-	  adc_checkPots();
+	  /* Dedicated ADC: no pot scan. */
 	  soundengine_process();
 	//  menu_tick();
 	  //buttonHandler_tick();
@@ -500,7 +502,7 @@ voiceControl_start();
 	  soundengine_process();
 	//  menu_tick();
 	//  adc_checkFaders();
-	  adc_checkCv();
+	  /* Dedicated ADC: no secondary CV scan. */
 	  soundengine_process();
 	//  menu_tick();
 
@@ -609,13 +611,13 @@ static void init_adc1(void)
 	hadc1.Instance = ADC1;
 	hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
 	hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
 	hadc1.Init.ContinuousConvMode = ENABLE;
 	hadc1.Init.DiscontinuousConvMode = DISABLE;
 	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
 	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	hadc1.Init.DataAlign = ADC_DATAALIGN_LEFT;
-	hadc1.Init.NbrOfConversion = ADC_BUF_LEN;
+	hadc1.Init.NbrOfConversion = 1;
 	hadc1.Init.DMAContinuousRequests = ENABLE;
 	hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 	if(HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -624,11 +626,11 @@ static void init_adc1(void)
 	}
 
 	ADC_ChannelConfTypeDef channel = {0};
-	for(uint32_t i=0; i<ADC_BUF_LEN; i++)
+	for(uint32_t i=0; i<1; i++)
 	{
-		channel.Channel = adc1_scan[i].channel;
-		channel.Rank = i + 1;	// ADC_REGULAR_RANK_n is n
-		channel.SamplingTime = adc1_scan[i].samplingTime;
+		channel.Channel = ADC_CHANNEL_4; /* CV1 only */
+		channel.Rank = ADC_REGULAR_RANK_1;
+		channel.SamplingTime = ADC_SAMPLETIME_144CYCLES;
 		if(HAL_ADC_ConfigChannel(&hadc1, &channel) != HAL_OK)
 		{
 			Error_Handler();
