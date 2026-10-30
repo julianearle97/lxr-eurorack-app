@@ -5,7 +5,7 @@
 #ifndef LXR_IDM_TRIGGERS_H
 #define LXR_IDM_TRIGGERS_H
 #include <stdint.h>
-#define IDM_VOICES 6
+#define IDM_VOICES 7
 #define IDM_EVENTS 48
 typedef enum { IDM_OFF, IDM_BURST, IDM_DIVIDE, IDM_BALL, IDM_DELAY, IDM_ROTATE, IDM_BREAK } IdmMode;
 typedef enum { IDM_INDEPENDENT, IDM_MASTER } IdmScope;
