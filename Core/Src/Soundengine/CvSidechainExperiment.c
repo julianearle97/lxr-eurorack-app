@@ -9,10 +9,13 @@ static volatile uint8_t kick_pending;
 static float duck=1.0f;
 static float dc=0.0f;
 static float last=0.0f;
+static volatile uint8_t duck_amount=127, highpass=0, input_gain=127, release=60;
+static float hp_low=0.0f;
+void cv_sidechain_set(uint8_t d,uint8_t hp,uint8_t g,uint8_t r){duck_amount=d;highpass=hp;input_gain=g;release=r;}
 void cv_sidechain_kick(void){kick_pending=1;}
 void cv_sidechain_mix(int16_t *output3_interleaved,uint32_t frames){
     if(!output3_interleaved)return;
-    if(kick_pending){kick_pending=0; duck=0.0f;}
+    if(kick_pending){kick_pending=0; duck=1.0f-((float)duck_amount/127.0f);}
     /* The normal ADC DMA scans 13 pots/CVs, not an audio-rate stream.
        Capture its most recent CV1 value once per block as a deliberately
        degraded proof-of-concept. DC blocking avoids enormous offset. */
@@ -20,11 +23,18 @@ void cv_sidechain_mix(int16_t *output3_interleaved,uint32_t frames){
     float x=(2048.0f-v)*8.0f;
     dc+=0.004f*(x-dc);
     x-=dc;
-    /* Gain recovers in about 180ms at the LXR's 44.1kHz output rate. */
+    /* 12..350ms one-pole recovery. Log-spaced high pass from 20..1600Hz. */
+    const float release_ms=12.0f+338.0f*((float)release/127.0f)*((float)release/127.0f);
+    const float recover=1.0f/(44.1f*release_ms);
+    const float cutoff=20.0f+(float)highpass*(float)highpass*0.098f;
+    const float hp_coef=(6.2831853f*cutoff)/(44100.0f+6.2831853f*cutoff);
+    const float makeup=(float)input_gain/127.0f;
     for(uint32_t i=0;i<frames;i++){
        float blend=(float)i/(float)(frames?frames:1);
        float s=last+(x-last)*blend;
-       duck+=(1.0f-duck)*0.000126f;
+       duck+=(1.0f-duck)*recover;
+       hp_low+=hp_coef*(s-hp_low);
+       s=(s-hp_low)*makeup;
        int32_t y=(int32_t)(s*duck);
        int32_t current=output3_interleaved[2*i];
        y+=current;
