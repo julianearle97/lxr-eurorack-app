@@ -757,6 +757,16 @@ FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 #endif
 	//write the preset data
 	preset_writeDrumsetData(presetNr, isMorph);
+	/* Custom mono rumble extension follows factory kit data. */
+	if(!isMorph) rumble_saveKit(presetNr);
+	const uint8_t rumbleExtension[8] = {'R','M','B',1,
+		rumbleKitParams[presetNr][0],rumbleKitParams[presetNr][1],
+		rumbleKitParams[presetNr][2],rumbleKitParams[presetNr][3]};
+	res=f_write((FIL*)&SDFile,rumbleExtension,sizeof(rumbleExtension),&bytesWritten);
+	if(res != FR_OK || bytesWritten != sizeof(rumbleExtension)) {
+		f_close((FIL*)&SDFile);
+		return FR_DISK_ERR;
+	}
 	
 	//close the file
 	f_close((FIL*)&SDFile);
@@ -1077,6 +1087,15 @@ FRESULT preset_loadDrumsetSD(uint8_t presetNr)
 #endif
 	//then the data
 	res=preset_readDrumsetData(presetNr);
+	if(res==FR_OK) {
+		uint8_t ext[8];
+		UINT n=0;
+		memset(rumbleKitParams[presetNr],0,4);
+		FRESULT extraRes=f_read((FIL*)&SDFile,ext,sizeof(ext),&n);
+		if(extraRes==FR_OK && n==sizeof(ext) && ext[0]=='R' && ext[1]=='M' && ext[2]=='B' && ext[3]==1) {
+			for(unsigned k=0;k<4;++k) rumbleKitParams[presetNr][k] = ext[4+k] <= 127 ? ext[4+k] : 127;
+		}
+	}
 #if !CALC_SAMPLES_IN_INTERRUPT
 	//to prevent audio dropouts
 	soundengine_calcNextSampleBlock();
