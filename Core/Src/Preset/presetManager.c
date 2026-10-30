@@ -48,6 +48,27 @@ static uint8_t rumbleKitParams[NUM_KIT_SLOTS][4];
 /* 7 voices x 4 controls + 4 master controls. */
 #define IDM_KIT_BYTES 32
 static uint8_t idmKitParams[NUM_KIT_SLOTS][IDM_KIT_BYTES];
+/* Optional 28-byte per-kit sample extension: factory kits default SYN. */
+#define SAMPLE_KIT_BYTES 28
+static uint8_t sampleKitParams[NUM_KIT_SLOTS][SAMPLE_KIT_BYTES];
+static void sample_resetKit(uint8_t kit){
+    if(kit>=NUM_KIT_SLOTS)return;
+    memset(sampleKitParams[kit],0,SAMPLE_KIT_BYTES);
+    for(unsigned v=0;v<7;v++){
+        sampleKitParams[kit][v*4+2]=64;
+        sampleKitParams[kit][v*4+3]=127;
+    }
+}
+static void sample_saveKit(uint8_t kit){
+    if(kit>=NUM_KIT_SLOTS)return;
+    memcpy(sampleKitParams[kit],&activeParameters[PAR_SAMPLE_V1_MODE],SAMPLE_KIT_BYTES);
+}
+static void sample_loadKit(uint8_t kit){
+    if(kit>=NUM_KIT_SLOTS)return;
+    memcpy(&activeParameters[PAR_SAMPLE_V1_MODE],sampleKitParams[kit],SAMPLE_KIT_BYTES);
+    menu_applyAllSamples();
+}
+
 static void idm_saveKit(uint8_t kit) {
     if(kit>=NUM_KIT_SLOTS) return;
     for(unsigned k=0;k<IDM_KIT_BYTES;++k)
@@ -517,6 +538,7 @@ void preset_init(uint8_t presetNr)
 {
 	memset(rumbleKitParams[presetNr],0,4);
 	memset(idmKitParams[presetNr],0,IDM_KIT_BYTES);
+	sample_resetKit(presetNr);
 
 	//const uint8_t presetNr = menu_selectedPresetNr[SAVE_TYPE_KIT];
 
@@ -562,6 +584,7 @@ void preset_init(uint8_t presetNr)
 	memcpy(activeParameters, mainParameters[presetNr], sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
 	rumble_loadKit(presetNr);
 		idm_loadKit(presetNr);
+		sample_loadKit(presetNr);
 	preset_sendDrumsetParameters();
 	//frontPanel_sendData(PRESET,PRESET_LOAD,presetNr);
 
@@ -730,6 +753,7 @@ void preset_saveDrumsetRam(uint8_t presetNr, uint8_t isMorph)
 		memcpy(mainParameters[presetNr], activeParameters, sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
 		rumble_saveKit(presetNr);
 		idm_saveKit(presetNr);
+		sample_saveKit(presetNr);
 	}
 }
 //----------------------------------------------------
@@ -798,6 +822,15 @@ FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 		return FR_DISK_ERR;
 	}
 
+	/* Optional SMP extension after RMB/IDM, preserving factory kit bytes. */
+    if(!isMorph)sample_saveKit(presetNr);
+    uint8_t smpExt[4+SAMPLE_KIT_BYTES]={'S','M','P',1};
+    memcpy(smpExt+4,sampleKitParams[presetNr],SAMPLE_KIT_BYTES);
+    res=f_write((FIL*)&SDFile,smpExt,sizeof(smpExt),&bytesWritten);
+    if(res!=FR_OK || bytesWritten!=sizeof(smpExt)){
+        f_close((FIL*)&SDFile);
+        return FR_DISK_ERR;
+    }
 	//close the file
 	f_close((FIL*)&SDFile);
 
@@ -1132,6 +1165,17 @@ FRESULT preset_loadDrumsetSD(uint8_t presetNr)
 		if(idmRes==FR_OK && idmRead==sizeof(idmExt) && idmExt[0]=='I' && idmExt[1]=='D' && idmExt[2]=='M' && idmExt[3]==1) {
 			for(unsigned k=0;k<IDM_KIT_BYTES;k++) idmKitParams[presetNr][k]=idmExt[k+4];
 		}
+
+        /* Factory/earlier custom kits have no SMP block; default SYN. */
+        sample_resetKit(presetNr);
+        uint8_t sampleExt[4+SAMPLE_KIT_BYTES];
+        UINT sampleRead=0;
+        FRESULT sampleRes=f_read((FIL*)&SDFile,sampleExt,sizeof(sampleExt),&sampleRead);
+        if(sampleRes==FR_OK && sampleRead==sizeof(sampleExt) &&
+           sampleExt[0]=='S' && sampleExt[1]=='M' && sampleExt[2]=='P' && sampleExt[3]==1){
+            for(unsigned k=0;k<SAMPLE_KIT_BYTES;k++)
+                sampleKitParams[presetNr][k]=sampleExt[k+4];
+        }
 
 	}
 #if !CALC_SAMPLES_IN_INTERRUPT
