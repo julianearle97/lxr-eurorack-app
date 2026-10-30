@@ -30,6 +30,7 @@
 #include <frontPanelParser_ui.h>
 #include "front.h"
 #include "Soundengine/FxBus.h"
+#include "Soundengine/DSPAudio/mixer.h"
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Soundengine/Soundengine.h"
 
@@ -264,7 +265,7 @@ const Name valueNames[NUM_NAMES] =
 
 //---------------------------------------------------------------
 // Parameter types. These correspond with ParamEnums and entries in parameter_values
-const enum Datatypes PROGMEM parameter_dtypes[NUM_PARAMS] = {
+const enum Datatypes PROGMEM parameter_dtypes[NUM_CUSTOM_PARAMS] = {
 	    /*PAR_NONE*/ 			DTYPE_0B127,							// 0
 	    /*PAR_OSC_WAVE_DRUM1*/ 	DTYPE_MENU | (MENU_WAVEFORM<<8),
 	    /*PAR_OSC_WAVE_DRUM2*/ 	DTYPE_MENU | (MENU_WAVEFORM<<8),
@@ -760,7 +761,7 @@ static uint8_t lastEncoderButton = 0;		/**< stores the state of the encoder butt
 /** array holding all the available parameter values*/
 uint8_t mainParameters[NUM_KIT_SLOTS][END_OF_SOUND_PARAMETERS];
 //uint8_t abs_pot_Parameter_position[NUM_PARAMS];
-uint8_t activeParameters[NUM_PARAMS];
+uint8_t activeParameters[NUM_CUSTOM_PARAMS];
 //uint8_t morphParameters[END_OF_SOUND_PARAMETERS];/**< a second array for sound x-fade to another preset*/
 //uint8_t *morphParameters;
 //-----------------------------------------------------------------
@@ -825,6 +826,11 @@ void menu_init()
 	//frontPanel_sendData(SEQ_CC,SEQ_ROLL_RATE,8); //value is initialized in cortex firmware
 
 	activeParameters[PAR_BPM] = 120;
+	/* Factory kits start with the custom effect disabled. */
+	activeParameters[PAR_RUMBLE_LEVEL] = 0;
+	activeParameters[PAR_RUMBLE_DECAY] = 64;
+	activeParameters[PAR_RUMBLE_LP] = 32;
+	activeParameters[PAR_RUMBLE_DUCK] = 75;
 
 
 	// todo I tried to move everything below here to main.c before the call
@@ -3293,6 +3299,11 @@ static void menu_encoderChangeParameter(int8_t inc)
 	} //parameter_dtypes[paramNr] & 0x0F
 
 
+	if (paramNr >= PAR_RUMBLE_LEVEL && paramNr <= PAR_RUMBLE_DUCK) {
+		mixer_setDrum1RumbleParams(activeParameters[PAR_RUMBLE_LEVEL], activeParameters[PAR_RUMBLE_DECAY], activeParameters[PAR_RUMBLE_LP], activeParameters[PAR_RUMBLE_DUCK]);
+		return;
+	}
+
 	// TODO this will also send MIDI_CC or CC_2 for the above items that have already been sent. is this desired?
 	//send parameter change to uart tx
 	if(paramNr < 128) // => Sound Parameter
@@ -3334,7 +3345,9 @@ checkvalid:
 
 		} else if(activeParameter == 8) { // moved past end of 2nd sub-page
 
-			if((menu_activePage==MENU_MIDI_PAGE) || (menu_activePage==SEQ_PAGE) || (buttonHandler_getMode() == SELECT_MODE_MOD)){ // in global menu, we can move to next sub-page
+			if(menu_activePage==VOICE1_PAGE && activePage==6) {
+				activePage=8; activeParameter=0;
+			} else if((menu_activePage==MENU_MIDI_PAGE) || (menu_activePage==SEQ_PAGE) || (buttonHandler_getMode() == SELECT_MODE_MOD)){ // in global menu, we can move to next sub-page
 
 				activeParameter=0; // set to par 0 of next sub page
 				activePage++; // and change page
@@ -3347,7 +3360,9 @@ checkvalid:
 		if(activeParameter == 3) { // move to first section of sub-page
 
 		} else if(activeParameter==-1) { // if we went past 0
-			if((menu_activePage==MENU_MIDI_PAGE) || (menu_activePage==SEQ_PAGE) || (buttonHandler_getMode() == SELECT_MODE_MOD)){ // in global menu, we can move to previous sub-page
+			if(menu_activePage==VOICE1_PAGE && activePage==8) {
+				activePage=6; activeParameter=4;
+			} else if((menu_activePage==MENU_MIDI_PAGE) || (menu_activePage==SEQ_PAGE) || (buttonHandler_getMode() == SELECT_MODE_MOD)){ // in global menu, we can move to previous sub-page
 
 				activeParameter=7; // put us on the last param of the previous sub-page
 				activePage--; // and change page
