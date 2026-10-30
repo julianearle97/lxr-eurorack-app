@@ -55,6 +55,7 @@ static void sample_resetKit(uint8_t kit){
     if(kit>=NUM_KIT_SLOTS)return;
     memset(sampleKitParams[kit],0,SAMPLE_KIT_BYTES);
     for(unsigned v=0;v<7;v++){
+        sampleKitParams[kit][v*4+1]=1;
         sampleKitParams[kit][v*4+2]=64;
         sampleKitParams[kit][v*4+3]=127;
     }
