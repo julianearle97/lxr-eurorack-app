@@ -528,6 +528,10 @@ const char shortNames[][4]  =
 	{"Dcy"},
 	{"LPF"},
 	{"Dck"},
+	{"s/m"},
+	{"slt"},
+	{"pit"},
+	{"vol"},
 };
 //-----------------------------------------------------------------
 // These correspond with the catNamesEnum in menu.h
@@ -666,6 +670,10 @@ const char longNames[][16] =
 	{"Rumble Decay"},
 	{"Rumble LP"},
 	{"Rumble Duck"},
+	{"Syn/Smp"},
+	{"Sample"},
+	{"Pitch"},
+	{"Volume"},
 };
 
 
