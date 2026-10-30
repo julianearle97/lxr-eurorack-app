@@ -12,7 +12,7 @@ static void schedule(IdmEngine *e,uint32_t due,uint8_t v,uint8_t n,uint8_t vel) 
 void Idm_init(IdmEngine *e) {
     memset(e,0,sizeof(*e));
     e->seed=0x9e3779b9u; e->step_ms=125;
-    e->master_mask=0x3f; e->scope=IDM_INDEPENDENT;
+    e->master_mask=0x7f; e->scope=IDM_INDEPENDENT;
 }
 void Idm_input(IdmEngine *e,uint32_t now,uint8_t voice,uint8_t note,uint8_t vel,IdmEmit emit,void *ctx) {
     if(voice>=IDM_VOICES) return;
