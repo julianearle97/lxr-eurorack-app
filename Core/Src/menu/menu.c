@@ -33,6 +33,7 @@
 #include "Soundengine/DSPAudio/mixer.h"
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include "Soundengine/SampleVoiceControl.h"
+#include "Soundengine/CvSidechainExperiment.h"
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Soundengine/Soundengine.h"
 
@@ -66,6 +67,7 @@ void menu_applySampleVoice(uint8_t voice) {
 void menu_applyAllSamples(void){
     for(uint8_t i=0;i<7;i++) menu_applySampleVoice(i);
 }
+void menu_applyCvSidechain(void){cv_sidechain_set(activeParameters[PAR_CV_DUCK_AMOUNT],activeParameters[PAR_CV_DUCK_HPF],activeParameters[PAR_CV_INPUT_GAIN],activeParameters[PAR_CV_DUCK_RELEASE]);}
 uint8_t display_refresh_state = 0;
 uint8_t display_needs_refresh = 0;
 uint8_t display_needs_clear_all = 0;
@@ -297,6 +299,10 @@ const Name valueNames[NUM_NAMES] =
 		{SHORT_SAMPLE_SLOT,CAT_SOUND,LONG_SAMPLE_SLOT},
 		{SHORT_SAMPLE_PITCH,CAT_SOUND,LONG_SAMPLE_PITCH},
 		{SHORT_SAMPLE_VOLUME,CAT_SOUND,LONG_SAMPLE_VOLUME},
+        {SHORT_CV_DUCK_AMOUNT,CAT_SOUND,LONG_CV_DUCK_AMOUNT},
+        {SHORT_CV_DUCK_HPF,CAT_SOUND,LONG_CV_DUCK_HPF},
+        {SHORT_CV_INPUT_GAIN,CAT_SOUND,LONG_CV_INPUT_GAIN},
+        {SHORT_CV_DUCK_RELEASE,CAT_SOUND,LONG_CV_DUCK_RELEASE},
 
 
 
@@ -687,7 +693,8 @@ const enum Datatypes PROGMEM parameter_dtypes[NUM_SAMPLE_PARAMS] = {
 	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_MENU | (MENU_SAMPLE_SLOT<<8), DTYPE_0B127, DTYPE_0B127,
 	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_MENU | (MENU_SAMPLE_SLOT<<8), DTYPE_0B127, DTYPE_0B127,
 	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_MENU | (MENU_SAMPLE_SLOT<<8), DTYPE_0B127, DTYPE_0B127,
-	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_MENU | (MENU_SAMPLE_SLOT<<8), DTYPE_0B127, DTYPE_0B127
+	DTYPE_MENU | (MENU_SAMPLE_MODE<<8), DTYPE_MENU | (MENU_SAMPLE_SLOT<<8), DTYPE_0B127, DTYPE_0B127,
+    DTYPE_0B127, DTYPE_0B127, DTYPE_0B127, DTYPE_0B127
 };
 
 
@@ -3430,6 +3437,8 @@ static void menu_moveToMenuItem(int8_t inc)
             if(inc > 0 && page == 0 && active == 2) {
                 menuIndex = (uint8_t)(1 << PAGE_SHIFT); return;
             }
+            if(inc > 0 && page == 1 && active == 3) {menuIndex=(uint8_t)(2 << PAGE_SHIFT);return;}
+            if(inc < 0 && page == 2 && active == 0) {menuIndex=(uint8_t)((1<<PAGE_SHIFT)|3);return;}
             if(inc < 0 && page == 1 && active == 0) {
                 menuIndex = 2; return;
             }
