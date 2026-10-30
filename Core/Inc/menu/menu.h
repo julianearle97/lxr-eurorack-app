@@ -27,7 +27,7 @@
 #include "../Parameters.h"
 //-----------------------------------------------------------------
 //#define NUM_PAGES 12		
-#define NUM_SUB_PAGES 8	// a maximum of 8 subpages 
+#define NUM_SUB_PAGES 9	// a maximum of 8 subpages 
 #define MASK_PARAMETER 0x07
 
 #define MASK_PAGE 0xf8
