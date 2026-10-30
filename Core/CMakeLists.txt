@@ -108,6 +108,7 @@ add_library(lxr_engine OBJECT
     Src/Soundengine/ModMatrix_Processor.c
     Src/Soundengine/Soundengine.c
     Src/Soundengine/TriggerProcessor.c
+    Src/Soundengine/IdmTriggers.c
 )
 
 # MIDI: UART driver, parsers, parameter mapping, voice control.
