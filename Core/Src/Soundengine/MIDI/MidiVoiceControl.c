@@ -16,6 +16,7 @@
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include "Soundengine/IdmTriggers.h"
 #include "Soundengine/SampleVoiceControl.h"
+#include "menu/menu.h"
 #include "Soundengine/DSPAudio/DrumVoice.h"
 #include "Soundengine/DSPAudio/Snare.h"
 #include "Soundengine/DSPAudio/HiHat.h"
@@ -36,6 +37,8 @@ static void idm_ensureInit(void) {if(!idmInitialized){Idm_init(&idm);idmInitiali
 static void idm_emit(void *ctx,uint8_t voice,uint8_t note,uint8_t vel) {
     (void)ctx;
     if(buttonHandler_getMutedVoices() & (1u<<voice)) return;
+    /* Reconcile kit-loaded mode with voice state before every note-on. */
+    menu_applySampleVoice(voice);
     SampleVoiceControl_trigger(voice,vel);
     if(SampleVoiceControl_isSample(voice)) {
        if(!buttonHandler_getDrumButton()) led_pulseLed(LED_2+voice);
