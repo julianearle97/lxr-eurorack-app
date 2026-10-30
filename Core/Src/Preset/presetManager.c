@@ -500,6 +500,7 @@ uint8_t preset_isNameEmpty(char* name)
 //load init kit
 void preset_init(uint8_t presetNr)
 {
+	memset(rumbleKitParams[presetNr],0,4);
 
 	//const uint8_t presetNr = menu_selectedPresetNr[SAVE_TYPE_KIT];
 
@@ -543,6 +544,7 @@ void preset_init(uint8_t presetNr)
 
 	//copy parameters to edit buffer
 	memcpy(activeParameters, mainParameters[presetNr], sizeof(uint8_t) * END_OF_SOUND_PARAMETERS);
+	rumble_loadKit(presetNr);
 	preset_sendDrumsetParameters();
 	//frontPanel_sendData(PRESET,PRESET_LOAD,presetNr);
 
