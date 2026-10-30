@@ -3382,6 +3382,18 @@ checkvalid:
 		}
 	}
 
+/* Allow turning the encoder past Drum 1 Mix to reach the four-knob Rumble page. */
+	if(menu_activePage == VOICE1_PAGE && buttonHandler_getMode() != SELECT_MODE_MOD) {
+		if(activePage == 6 && inc > 0 && activeParameter == 5) {
+			menuIndex = (uint8_t)(8 << PAGE_SHIFT);
+			return;
+		}
+		if(activePage == 8 && inc < 0 && activeParameter == -1) {
+			menuIndex = (uint8_t)((6 << PAGE_SHIFT) | 4);
+			return;
+		}
+	}
+
 	// read the new param
 	if(buttonHandler_getMode() == SELECT_MODE_MOD)
 	{
