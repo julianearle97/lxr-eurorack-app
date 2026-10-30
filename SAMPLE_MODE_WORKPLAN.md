@@ -1,27 +1,31 @@
-# Sample-mode development — not flashable
+# LXR sample mode: uploaded WAVs and pitch/volume prototype
 
-Requested interface: per-drum Oscillator page switch `SYN` / `SMP` and a sample selector. SYN uses existing synthesis unchanged; SMP plays a one-shot from a small custom bank instead of that voice's synth engine. The working Rumble and IDM baseline is `fix/idm-event-playback-v1561`.
+## User sample bank
 
-## Findings from actual source
+12 WAVs supplied, all 44.1 kHz, stereo 16-bit PCM. Exact total duration 9.246 s. Converted to **407,759 bytes** signed mono 8-bit 44.1 kHz PCM with filenames, offsets and lengths preserved in a separate manifest. The assets are provided as `lxr_sample_bank_assets.zip` in the ChatGPT conversation. These bytes are **not yet embedded in firmware**.
 
-- The existing transient bank contains **12** short 8-bit signed mono samples, each **2205 samples (~50 ms at 44.1 kHz)**; it is compiled into `transientTables.c` and stored using `INDTCM` (fast RAM).
-- Factory click samples do not contain long clap/open-hat tails. Replacing the bytes in-place would cut each imported sample to ~50 ms; not appropriate for full drum one-shots.
-- Drum voices share different synth engines. The LXR exposes seven note targets (including separate open and closed hat triggers), but the hat voices share the same audio engine and choke behavior.
-- A custom bank should therefore live in **flash** or another validated memory region, with limited mono samples at a known fixed rate, not in the existing tightly limited 128 KB DTCM.
-- SD card currently stores kits and firmware updates; arbitrary real-time WAV playback is not already implemented. An SD sample loader needs independent engineering and latency tests.
+User-requested four-knob oscillator sample page:
 
-## Current commit
+1. SYN/SMP (factory default SYN)
+2. Sample slot (1–12)
+3. Pitch (center 64, roughly +/-24 semitones)
+4. Volume (0–127)
 
-`SampleVoiceBank.c/.h` is a standalone *prototype* supporting per-voice sample enabling, sample index and trigger/retrigger. It uses the stock 50ms transient slots for a basic signal path proof of concept. **Not wired to the oscillator menu, mixer, kit storage, or sample imports.** Do not flash this branch expecting sample mode.
+**SYN must retain existing oscillator functionality**; when SMP is enabled, audio comes from a selected full-length one-shot. Existing voice volume, output assignment, mute, MIDI triggering, custom rumble and IDM routing must remain intact.
 
-## Next engineering milestones
+## Code completed so far
 
-1. Decide maximum custom sample length and count from the supplied WAVs; use firmware-embedded samples initially for reliable timing.
-2. Convert only the user's files into a flash-resident sample bank (mono PCM with explicit lengths), without deleting original transient samples in the baseline.
-3. Switch between synth and sample rendering at each voice, preserve original output routing, volume and mono kick rumble.
-4. Preserve closed-hat choke of open-hat sample playback; ensure samples retrigger precisely from start.
-5. Add SYN/SMP selection and sample slot to each oscillator page, with versioned per-kit save/restore and factory default SYN.
-6. Host tests: silence when inactive, audio length, retrigger, voice isolation and choke. ARM build and memory audit.
-7. Test playback timing/audio on hardware before releasing a firmware image.
+`Core/Src/Soundengine/SampleVoiceBank.c/.h` implement an **isolated prototype**, with full-length PCM8 slots, 64-bit fractional phase, pitch-rate control, per-voice volume and velocity, retrigger and explicit stop (needed for open-hat choking). Host regression tests are included in CI.
 
-Source licensed GPL-3.0-only; modified firmware must be labeled unofficial.
+**Not flash-ready.** The uploaded sample bank isn't in GitHub, the DSP prototype isn't in the ARM link, and the oscillator menu, per-kit save, per-voice routing and shared hi-hat handling have not been integrated.
+
+The stock 12 click transients are 50 ms each and are held in DTCM, so they cannot simply hold these longer files in their existing allocation. For 9.246 s at 44.1 kHz, our compact PCM8 bank needs about 398 KiB of additional flash; final image and CPU usage require measurement.
+
+## Remaining work
+
+- Transfer the PCM8 bank and manifest into the project build, as read-only flash data with lengths.
+- Add the four-knob SYN/SMP/Slot/Pitch/Volume pages while preserving regular Osc page behavior.
+- Bypass synth engine only for voices in SMP mode; route samples through normal mixer.
+- Implement closed-hat choke of the open-hat sample; independent timing and note input behavior.
+- Versioned kit persistence, old kits default SYN.
+- Build/size/test with all existing rumble+IDM features. Hardware first-play testing with backup firmware.
