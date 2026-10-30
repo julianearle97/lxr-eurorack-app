@@ -45,6 +45,7 @@
 #define MENU_CV_SRC			26
 #define MENU_CV_SAVE		27
 #define MENU_AUDIO_OUT_FX	28
+#define MENU_SAMPLE_MODE 29
 
 //-----------------------------------------------------------------
 // Shared texts. Reduce mem usage by pooling common text
@@ -397,6 +398,7 @@ const char midiRoutingNames[][6] =
 		{"M2A"},
 };
 //-----------------------------------------------------------------
+const char sampleModeNames[][7] = { {2,0}, {"SYN"}, {"SMP"} };
 const char mixFmNames[][6] =
 {
 		{2},	// number of entries
