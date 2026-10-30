@@ -44,4 +44,8 @@ void voiceControl_noteOn(uint8_t voice, uint8_t note, uint8_t vel);
 //called after everything else is initialized, to prevent hanging notes from triggers during module init
 void voiceControl_start();
 
+/* Unofficial built-in trigger glitch engine (all seven synth voices). */
+void voiceControl_idmSetVoice(uint8_t voice,uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length);
+void voiceControl_idmSetMaster(uint8_t mode,uint8_t chance,uint8_t amount,uint8_t length,uint8_t mask);
+void voiceControl_idmScope(uint8_t scope);
 #endif /* MIDIVOICECONTROL_H_ */
