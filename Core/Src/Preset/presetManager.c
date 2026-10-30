@@ -681,6 +681,8 @@ void preset_loadDrumsetRam(uint8_t presetNr, uint8_t isMorph, uint8_t sendImmedi
 		//morphParameters = mainParameters[activeParameters[PAR_MORPH_KIT_DEST]];
 
 		rumble_loadKit(presetNr);
+        idm_loadKit(presetNr);
+        sample_loadKit(presetNr);
 		preset_saveLastUsedPresetNrToSD(presetNr);
 
 	}
