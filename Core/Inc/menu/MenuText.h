@@ -89,7 +89,7 @@ const char cvSrcNames[][4] =
 	{"lf4"},
 	{"lf5"},
 	{"lf6"},
-	{"ac1"},
+	{"---"},
 	{"ac2"},
 	{"ac3"},
 	{"ac4"},
