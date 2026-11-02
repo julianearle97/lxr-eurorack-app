@@ -17,7 +17,7 @@ static uint8_t bbEnabled=0,bbChance=50,bbRepeat=64,bbSpeed=64;
 void BBCut_setControls(uint8_t on,uint8_t chance,uint8_t repeat,uint8_t speed){bbEnabled=(on!=0);bbChance=chance;bbRepeat=repeat;bbSpeed=speed;}
 uint8_t BBCut_enabled(void){return bbEnabled;}
 static uint32_t rng(void) {seed^=seed<<13;seed^=seed>>17;seed^=seed<<5;return seed;}
-static uint32_t clampSample(uint32_t n) {if(n<16u)return 16u; if(n>BBCUT_RING-64u)return BBCUT_RING-64u; return n;}
+static uint32_t clampSample(uint32_t n) {if(n<16u)return 16u; if(n>BBCUT_RING/2u)return BBCUT_RING/2u; return n;}
 void BBCut_init(void) {
   memset(ring,0,sizeof(ring));
   writePos=sampleCount=cutRemaining=cutLength=cutRead=repeatsRemaining=phraseUnitsDone=0;
@@ -83,21 +83,21 @@ static uint32_t samplesPerUnit(void) {
 static void nextBlock(void) {
   if(phraseUnitsDone>=24u) phraseUnitsDone=0;
   uint32_t left=24u-phraseUnitsDone;
-  stutter=(left<=4u && (rng()%100u)<bbChance);
+  stutter=((rng()%100u)<bbChance) && (left<=8u || bbChance>=75u);
   uint32_t unit=samplesPerUnit();
   if(stutter) {
     cutLength=clampSample(unit/(2u+bbSpeed/24u));
     repeatsRemaining=2u+(rng()%4u);
     phraseUnitsDone=24u;
   } else {
-    uint32_t odd=1u+2u*(rng()%3u);
+    uint32_t odd=1u+2u*(rng()%(bbSpeed>90u?2u:3u));
     if(odd>left) odd=left;
     cutLength=clampSample(unit*odd);
     repeatsRemaining=1u+((rng()%128u)<bbRepeat ? 1u+(rng()%3u):0u);
     phraseUnitsDone+=odd*repeatsRemaining;
     if(phraseUnitsDone>24u) phraseUnitsDone=24u;
   }
-  playbackMode=(uint8_t)(rng()%5u);
+  playbackMode=(uint8_t)((rng()%100u)<bbChance ? (1u+(rng()%4u)):0u);
   heldStart=(writePos+BBCUT_RING-cutLength)&BBCUT_MASK;
   cutRemaining=0;
 }
@@ -122,7 +122,7 @@ void BBCut_processStereo(int16_t *out,uint32_t frames) {
     if(playbackMode==1u)rd=(cutRead+cutLength-1u-progress)&BBCUT_MASK;
     else if(playbackMode==2u)rd=(cutRead+(progress>>1))&BBCUT_MASK;
     else rd=(cutRead+progress)&BBCUT_MASK;
-    int16_t result=(sampleCount>cutLength+64u)?ring[rd]:mono;
+    int16_t result=(sampleCount>256u)?ring[rd]:mono;
     /* Short linear crossfade into cut edges to reduce clicks. */
     uint32_t fade=progress<32u?progress: (cutRemaining<32u?cutRemaining:32u);
     if(fade<32u)result=(int16_t)(((int32_t)result*(int32_t)fade+(int32_t)mono*(int32_t)(32u-fade))/32);
