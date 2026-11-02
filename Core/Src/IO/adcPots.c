@@ -12,6 +12,7 @@
  * NOTICE.md. See LICENSE and NOTICE.md in the root of the repository.
  */ 
 #include "IO/adcPots.h"
+#include "Soundengine/BBCutMono.h"
 #include <string.h>
 #include "menu/menu.h"
 #include "math.h"
@@ -264,6 +265,7 @@ void adc_checkCv()
 			//{
 		//	if(newValue < 0.01f) newValue = 0.f;
 			adc_CvValues[i-8] = newValue;
+			if (i==8) BBCut_clockSample(newValue, HAL_GetTick());
 			//}
 		}
 	}
