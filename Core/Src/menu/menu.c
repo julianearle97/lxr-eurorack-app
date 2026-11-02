@@ -551,7 +551,7 @@ const enum Datatypes PROGMEM parameter_dtypes[NUM_SAMPLE_PARAMS] = {
 		/*TEXT_FX_AMOUNT*/		DTYPE_0B100,
 
 		/*PAR_FX_DIST_TYPE*/ 	DTYPE_MENU| (MENU_DIST<<8),
-		/*PAR_FX_P1*/			DTYPE_MENU | (MENU_DELAY_DIV<<8),
+		/*PAR_FX_P1*/			DTYPE_0B127,
 		/*PAR_FX_P2*/			DTYPE_0B127,
 		/*PAR_FX_P3*/			DTYPE_0B127,
 		/*PAR_FX_P4*/			DTYPE_0B127,
@@ -810,6 +810,12 @@ char editDisplayBuffer[2][17];		/**< what should be shown on the LCD after the n
 uint8_t visibleCursor=0;	/* cursor position and whether it's visible rightmost=visible, then row (0,1) then col: ccccrv */
 /* calc cursor to location (row, col both zero based) and make visible/invisible */
 #define VIS_CURS(r,c,v) (((c) << 2) | ((r) << 1) | (v))
+static uint16_t menu_runtimeDtype(uint16_t p) {
+    if (p == PAR_FX_P1 && fxBus.fxType == FX_DELAY)
+        return DTYPE_MENU | (MENU_DELAY_DIV << 8);
+    return parameter_dtypes[p];
+}
+
 uint8_t menu_activePage = 0;				/**< indicates which menu page is currently shown*/
 uint8_t menu_activeVoice = 0;
 uint8_t menu_playedPattern = 0;
@@ -3166,9 +3172,9 @@ static void menu_encoderChangeParameter(int8_t inc)
 		}
 	}
 
-	switch(parameter_dtypes[paramNr] & 0xFF)
+	switch(menu_runtimeDtype(paramNr) & 0xFF)
 	{
-	case DTYPE_TARGET_SELECTION_VELO: //parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_TARGET_SELECTION_VELO: //menu_runtimeDtype(paramNr) & 0x0F
 	{
 		//**VELO encoder value limit to start and end of range for this voice
 		// get voice, and figure valid range, translate to param number before sending
@@ -3197,7 +3203,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 	}
 		break;
 
-	case DTYPE_VOICE_LFO://parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_VOICE_LFO://menu_runtimeDtype(paramNr) & 0x0F
 	{
 		//**LFO - limit voice number to 1-6 range. determine target selection so we can send it with voice #
 		if(*paramValue < 1)
@@ -3225,7 +3231,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 		//return;
 	}
 		break;
-	case DTYPE_TARGET_SELECTION_LFO://parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_TARGET_SELECTION_LFO://menu_runtimeDtype(paramNr) & 0x0F
 	{
 		//**LFO - limit encoder start and end to range for the target voice (not the lfo number)
 		// this is a value from 1 to 6, so we adjust to be 0 based
@@ -3293,7 +3299,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 	}
 		break;
 /*
-	case DTYPE_AUTOM_TARGET: {//parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_AUTOM_TARGET: {//menu_runtimeDtype(paramNr) & 0x0F
 		const uint8_t nmt=getNumModTargets();
 		//AUTOM - limit to valid range for encoder
 		if(*paramValue >= nmt)
@@ -3310,7 +3316,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 
 
 
-	case DTYPE_1B16://parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_1B16://menu_runtimeDtype(paramNr) & 0x0F
 		if(*paramValue < 1)
 			*paramValue = 1;
 		else if(*paramValue > 16)
@@ -3330,7 +3336,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 		if(*paramValue>15)
 			*paramValue = 15;
 		break;
-	//case DTYPE_MIX_FM://parameter_dtypes[paramNr] & 0x0F
+	//case DTYPE_MIX_FM://menu_runtimeDtype(paramNr) & 0x0F
 	case DTYPE_ON_OFF:
 	case DTYPE_0b1:
 		if(*paramValue > 1)
@@ -3339,19 +3345,19 @@ static void menu_encoderChangeParameter(int8_t inc)
 
 
 
-	case DTYPE_MENU://parameter_dtypes[paramNr] & 0x0F
+	case DTYPE_MENU://menu_runtimeDtype(paramNr) & 0x0F
 	{
 		//get the used menu (upper 4 bit)
-		const uint8_t menuId = parameter_dtypes[paramNr] >> 8;
+		const uint8_t menuId = menu_runtimeDtype(paramNr) >> 8;
 		//get the number of entries
 		uint8_t numEntries = getMaxEntriesForMenu(menuId);
 		if(*paramValue >= numEntries)
 			*paramValue = (uint8_t)(numEntries-1);
 
-	} // parameter_dtypes[paramNr] & 0x0F case DTYPE_MENU
+	} // menu_runtimeDtype(paramNr) & 0x0F case DTYPE_MENU
 		break;
 
-	default://parameter_dtypes[paramNr] & 0x0F
+	default://menu_runtimeDtype(paramNr) & 0x0F
 
 	case DTYPE_0B100:
 		if(*paramValue > 100)
@@ -3368,7 +3374,7 @@ static void menu_encoderChangeParameter(int8_t inc)
 		if(*paramValue > 127)
 			*paramValue = 127;
 		break;
-	} //parameter_dtypes[paramNr] & 0x0F
+	} //menu_runtimeDtype(paramNr) & 0x0F
 
 
 	if(paramNr >= PAR_IDM_V1_MODE && paramNr <= PAR_IDM_MASTER_LENGTH) {
@@ -4229,7 +4235,7 @@ static uint8_t limitPotValue(int8_t diff, uint16_t paramNr)
 
 	//limit to range
 
-	switch(parameter_dtypes[paramNr] & 0xFF)
+	switch(menu_runtimeDtype(paramNr) & 0xFF)
 	{
 	case DTYPE_TARGET_SELECTION_CV:
 	case DTYPE_TARGET_SELECTION_VELO:
@@ -4299,7 +4305,7 @@ static uint8_t limitPotValue(int8_t diff, uint16_t paramNr)
 	case DTYPE_MENU:
 	{
 		//get the used menu (upper 4 bit)
-		const uint8_t menuId = parameter_dtypes[paramNr] >> 8;
+		const uint8_t menuId = menu_runtimeDtype(paramNr) >> 8;
 		//get the number of entries
 		uint8_t numEntries=getMaxEntriesForMenu(menuId);
 		//return (uint8_t)(frac * (numEntries-1));
@@ -4333,7 +4339,7 @@ static uint8_t getDtypeValue(uint8_t value, uint16_t paramNr)
 {
 	const float frac = (value/255.f); // yield a fraction from 0 to 1
 
-	switch(pgm_read_word(&parameter_dtypes[paramNr]) & 0xFF)
+	switch(pgm_read_word(&menu_runtimeDtype(paramNr)) & 0xFF)
 	{
 	case DTYPE_TARGET_SELECTION_VELO:
 	case DTYPE_TARGET_SELECTION_LFO: {
@@ -4383,7 +4389,7 @@ static uint8_t getDtypeValue(uint8_t value, uint16_t paramNr)
 	case DTYPE_MENU:
 	{
 		//get the used menu (upper 4 bit)
-		const uint8_t menuId = pgm_read_word(&parameter_dtypes[paramNr]) >> 8;
+		const uint8_t menuId = pgm_read_word(&menu_runtimeDtype(paramNr)) >> 8;
 		//get the number of entries
 		uint8_t numEntries=getMaxEntriesForMenu(menuId);
 		return (uint8_t)(frac * (numEntries-1));
@@ -4419,7 +4425,7 @@ uint8_t menu_getDisplayParameterType(uint8_t pos)
 	}
 
 
-	return parameter_dtypes[paramNr] & 0xFF;
+	return menu_runtimeDtype(paramNr) & 0xFF;
 }
 //-----------------------------------------------------------------
 uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
@@ -4518,7 +4524,7 @@ uint8_t menu_parseKnobValue(uint8_t potNr, int16_t diff)
 		return 1;
 	}
 
-	switch(parameter_dtypes[paramNr] & 0xFF)
+	switch(menu_runtimeDtype(paramNr) & 0xFF)
 	{
 
 	case DTYPE_TARGET_SELECTION_VELO:
