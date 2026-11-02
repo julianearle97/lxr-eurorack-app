@@ -20,6 +20,7 @@
 #include "limits.h"
 #include "Soundengine/config.h"
 #include "Soundengine/BBCutMono.h"
+#include "menu/menu.h"
 #include "Soundengine/DSPAudio/medianFilter.h"
 
 #include "main.h"
