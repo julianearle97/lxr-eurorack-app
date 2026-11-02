@@ -118,23 +118,29 @@ IN_ITCM_RAM void FxBus_process(int16_t *fxBuffer, int16_t* outL,int16_t* outR,in
 
 	case FX_DELAY:
         {
-            static uint8_t externallyClocked=0;
-            static float lastBpm=0.f;
-            uint8_t active=BBCut_clockActive(HAL_GetTick());
-            if (active) {
-                float bpm=BBCut_bpm();
-                if(!externallyClocked || bpm>lastBpm+1.f || bpm<lastBpm-1.f) {
-                    float n=(44100.f*60.f/bpm-882.f)/(32767.f-882.f);
-                    if(n<0.f)n=0.f;
-                    if(n>1.f)n=1.f;
-                    Delay_setRange(&fxBus.delay,1.f);
-                    Delay_setDelayTime(&fxBus.delay,n);
-                    externallyClocked=1;lastBpm=bpm;
-                }
-            } else if(externallyClocked) {
-                Delay_setRange(&fxBus.delay,fxBus.parameter[1]);
-                Delay_setDelayTime(&fxBus.delay,fxBus.parameter[0]);
-                externallyClocked=0;
+            /* Musical note division relative to incoming ACC1 tempo.
+             * The built-in delay RAM is only 32768 samples (0.743 s).
+             * Requested longer divisions are clamped to its max capacity. */
+            static uint8_t previousDiv=255u;
+            static float previousBpm=0.f;
+            static uint8_t wasExternallyClocked=0u;
+            uint8_t external=BBCut_clockActive(HAL_GetTick());
+            float bpm=external?BBCut_bpm():120.f;
+            if(bpm<20.f)bpm=120.f;
+            uint8_t div=(uint8_t)fxBus.parameter[0];
+            if(div>5u)div=5u;
+            const float beatMultipliers[6]={4.f,2.f,1.f,0.5f,0.25f,0.125f};
+            if(div!=previousDiv || (bpm>previousBpm+0.25f) ||
+               (bpm<previousBpm-0.25f) || external!=wasExternallyClocked) {
+                float samples=(44100.f*60.f*beatMultipliers[div])/bpm;
+                if(samples>32760.f)samples=32760.f;
+                if(samples<900.f)samples=900.f;
+                float normalized=(samples-882.f)/(32767.f-882.f);
+                if(normalized<0.f)normalized=0.f;
+                if(normalized>1.f)normalized=1.f;
+                Delay_setRange(&fxBus.delay,1.f);
+                Delay_setDelayTime(&fxBus.delay,normalized);
+                previousDiv=div;previousBpm=bpm;wasExternallyClocked=external;
             }
         }
         if(fxBus.delay.delayType == DELAY_NORMAL)
@@ -191,10 +197,7 @@ IN_ITCM_RAM void FxBus_updateParameter()
 		break;
 
 	case FX_DELAY:
-        if (!BBCut_clockActive(HAL_GetTick())) {
-            Delay_setRange(&fxBus.delay, fxBus.parameter[1]);
-            Delay_setDelayTime(&fxBus.delay, fxBus.parameter[0]);
-        }
+        /* Clock-controlled time updated in FxBus_process, not on knob refresh. */
 		Delay_setFilter(&fxBus.delay, fxBus.parameter[2]);
 		Delay_setFeedback(&fxBus.delay, fxBus.parameter[3]);
 
