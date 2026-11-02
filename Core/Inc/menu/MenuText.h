@@ -62,9 +62,13 @@ const char menuText_any[]  	= "any";
 //-----------------------------------------------------------------
 const char cvSaveNames[][4] =
 {
-	{2},		//number of entries
-	{"kit"},
-	{"glo"},
+	{6}, // shared CV1 clock PPQN menu: legacy CV SAVE parameter is unused
+    {"1"},
+    {"2"},
+    {"4"},
+    {"8"},
+    {"16"},
+    {"24"},
 
 
 	//{"+8"},
@@ -74,7 +78,7 @@ const char cvSaveNames[][4] =
 const char cvSrcNames[][4] =
 {
 	{17},		//number of entries
-	{"cv1"},
+	{"---"},
 	{"cv2"},
 	{"cv3"},
 	{"cv4"},
@@ -673,7 +677,7 @@ const char longNames[][16] =
 	{"Shift"},
 	{"Source"},
 	{"1V/Oct"},
-	{"CV Save"},
+	{"Clk PPQ"},
 	{"MrphTrgt"},
 	{"Rumble Lvl"},
 	{"Rumble Decay"},
