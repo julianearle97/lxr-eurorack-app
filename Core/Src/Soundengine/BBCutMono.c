@@ -9,6 +9,7 @@ static int16_t ring[BBCUT_RING];
 static uint32_t writePos, sampleCount, cutRemaining, cutLength, cutRead;
 static uint32_t repeatsRemaining, phraseUnitsDone, heldStart, cycle;
 static uint8_t playbackMode, clockPulseCount;
+static volatile uint8_t barSyncPending;
 static uint8_t ppqn=1, gate, validClock, stutter;
 static uint32_t lastRiseMs, pulseMs, seed=0x12a74b19u;
 static float tempo=120.f;
@@ -21,7 +22,7 @@ void BBCut_init(void) {
   memset(ring,0,sizeof(ring));
   writePos=sampleCount=cutRemaining=cutLength=cutRead=repeatsRemaining=phraseUnitsDone=0;
   lastRiseMs=pulseMs=0; gate=validClock=stutter=0; tempo=120.f; ppqn=1;
-  heldStart=cycle=clockPulseCount=0; playbackMode=0;
+  heldStart=cycle=clockPulseCount=0; playbackMode=0; barSyncPending=0;
 }
 void BBCut_setPpqn(uint8_t n) {
   if(n==1 || n==2 || n==4 || n==8 || n==16 || n==24) {
@@ -43,7 +44,7 @@ void BBCut_clockPulse(uint32_t now) {
     lastRiseMs=now;
     clockPulseCount++;
     /* Re-anchor phrase scheduling to the external beat boundary. */
-    if(clockPulseCount>=ppqn){clockPulseCount=0;cycle++;}
+    if(clockPulseCount>=ppqn){clockPulseCount=0;cycle++;if((cycle&3u)==0u)barSyncPending=1u;}
 }
 void BBCut_clockSample(float cv, uint32_t now) {
   if(!gate && cv>0.60f) {
@@ -102,6 +103,7 @@ static void nextBlock(void) {
 }
 void BBCut_processStereo(int16_t *out,uint32_t frames) {
   for(uint32_t i=0;i<frames;i++) {
+    if(barSyncPending){barSyncPending=0;phraseUnitsDone=0;repeatsRemaining=0;cutRemaining=0;}
     int32_t sum=(int32_t)out[i*2]+out[i*2+1];
     int16_t mono=(int16_t)(sum/2);
     ring[writePos]=mono;
