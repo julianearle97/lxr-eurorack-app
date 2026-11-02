@@ -1,0 +1,24 @@
+name: BBCut firmware compile check
+on:
+  push:
+    branches: [feature/bbcut-v1580]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ARM compiler
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release -j2
+      - name: Upload firmware binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: bbcut-firmware-experimental
+          path: |
+            build/release/**/*.img
+            build/release/**/*.bin
+          if-no-files-found: warn
