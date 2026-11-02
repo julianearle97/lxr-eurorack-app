@@ -23,6 +23,20 @@ void BBCut_setPpqn(uint8_t n) {
     if(ppqn!=n){ppqn=n; validClock=0; lastRiseMs=0;}
   }
 }
+void BBCut_clockPulse(uint32_t now) {
+    if(lastRiseMs) {
+        uint32_t dt=now-lastRiseMs;
+        if(dt>=3u && dt<4000u) {
+            float next=60000.f/((float)dt*(float)ppqn);
+            if(next>=20.f && next<=300.f) {
+                pulseMs=dt;
+                tempo=validClock?tempo*0.75f+next*0.25f:next;
+                validClock=1;
+            }
+        }
+    }
+    lastRiseMs=now;
+}
 void BBCut_clockSample(float cv, uint32_t now) {
   if(!gate && cv>0.60f) {
     gate=1;
