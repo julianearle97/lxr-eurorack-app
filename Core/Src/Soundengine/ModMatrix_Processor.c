@@ -38,11 +38,6 @@ void CV_process()
 
 	for(uint8_t i=0;i<NUM_MOD_SLOTS;i++)
 	{
-		if(activeParameters[PAR_CV_SRC_1 + i] == 0) {
-			cvModulators[i].amount = 0.f;
-			modNode_updateValue(&cvModulators[i], 0.f);
-			continue;
-		}
 		if(activeParameters[PAR_CV_MOD_AMT_1 + i] == 0) continue; //skip zero amount modulations
 		cvModulators[i].amount = (activeParameters[PAR_CV_MOD_AMT_1 + i])/100.f;
 
