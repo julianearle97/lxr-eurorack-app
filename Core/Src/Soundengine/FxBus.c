@@ -14,6 +14,8 @@
 
 
 #include "Soundengine/FxBus.h"
+#include "Soundengine/BBCutMono.h"
+#include "stm32f7xx_hal.h"
 #include "Soundengine/DSPAudio/BufferTools.h"
 #include "Soundengine/DSPAudio/mixer.h"
 INDTCMZ FxBus fxBus;
@@ -115,7 +117,27 @@ IN_ITCM_RAM void FxBus_process(int16_t *fxBuffer, int16_t* outL,int16_t* outR,in
 		break;
 
 	case FX_DELAY:
-		if(fxBus.delay.delayType == DELAY_NORMAL)
+        {
+            static uint8_t externallyClocked=0;
+            static float lastBpm=0.f;
+            uint8_t active=BBCut_clockActive(HAL_GetTick());
+            if (active) {
+                float bpm=BBCut_bpm();
+                if(!externallyClocked || bpm>lastBpm+1.f || bpm<lastBpm-1.f) {
+                    float n=(44100.f*60.f/bpm-882.f)/(32767.f-882.f);
+                    if(n<0.f)n=0.f;
+                    if(n>1.f)n=1.f;
+                    Delay_setRange(&fxBus.delay,1.f);
+                    Delay_setDelayTime(&fxBus.delay,n);
+                    externallyClocked=1;lastBpm=bpm;
+                }
+            } else if(externallyClocked) {
+                Delay_setRange(&fxBus.delay,fxBus.parameter[1]);
+                Delay_setDelayTime(&fxBus.delay,fxBus.parameter[0]);
+                externallyClocked=0;
+            }
+        }
+        if(fxBus.delay.delayType == DELAY_NORMAL)
 		{
 			Delay_process(&fxBus.delay, fxBuffer, out, out2, size, channels, fxBus.dryWet);
 		}
