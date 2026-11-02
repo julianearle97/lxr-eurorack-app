@@ -5,6 +5,8 @@
  * The original BBCut source is GPL-2.0; this derived port remains GPL-compatible. */
 void BBCut_init(void);
 void BBCut_setPpqn(uint8_t ppqn);
+void BBCut_setControls(uint8_t enabled, uint8_t chance, uint8_t repeat, uint8_t speed);
+uint8_t BBCut_enabled(void);
 void BBCut_clockSample(float normalizedCv, uint32_t milliseconds);
 void BBCut_clockPulse(uint32_t milliseconds);
 uint8_t BBCut_clockActive(uint32_t milliseconds);
