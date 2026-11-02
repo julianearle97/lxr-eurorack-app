@@ -12,6 +12,7 @@
  * NOTICE.md. See LICENSE and NOTICE.md in the root of the repository.
  */
 #include "Soundengine/Soundengine.h"
+#include "Soundengine/BBCutMono.h"
 #include "Soundengine/AudioCodecManager.h"
 #include "Preset/PresetManager.h"
 #include <string.h>
@@ -37,6 +38,7 @@ uint8_t soundengine_calcNextSampleBlock()
 
 void soundengine_init()
 {
+	BBCut_init();
 	mixer_init();
 
 
