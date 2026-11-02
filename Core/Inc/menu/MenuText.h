@@ -47,6 +47,7 @@
 #define MENU_AUDIO_OUT_FX	28
 #define MENU_SAMPLE_MODE 29
 #define MENU_SAMPLE_SLOT 30
+#define MENU_DELAY_DIV 31
 
 //-----------------------------------------------------------------
 // Shared texts. Reduce mem usage by pooling common text
@@ -60,6 +61,7 @@ const char menuText_dash[] 	="---";
 const char menuText_blank[] ="   ";
 const char menuText_any[]  	= "any";
 //-----------------------------------------------------------------
+const char delayDivisionNames[][4] = { {6}, {"1/1"}, {"1/2"}, {"1/4"}, {"1/8"}, {"1/16"}, {"1/32"} };
 const char cvSaveNames[][4] =
 {
 	{6}, // shared ACC1 clock PPQN menu: legacy CV SAVE parameter is unused
