@@ -14,6 +14,7 @@
 #include <Soundengine/ModMatrix_Processor.h>
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/mixer.h"
+#include "Soundengine/BBCutMono.h"
 #include "Soundengine/config.h"
 #include "Soundengine/AudioCodecManager.h"
 #include "Soundengine/DSPAudio/CymbalVoice.h"
