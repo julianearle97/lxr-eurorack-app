@@ -720,6 +720,8 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
+	/* Dedicated clocked master-slice effect on DAC1 (outputs 1/2). */
+	if (BBCut_clockActive(HAL_GetTick())) BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
