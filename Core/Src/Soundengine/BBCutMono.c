@@ -7,7 +7,8 @@
 #define BBCUT_FS 44100u
 static int16_t ring[BBCUT_RING];
 static uint32_t writePos, sampleCount, cutRemaining, cutLength, cutRead;
-static uint32_t repeatsRemaining, phraseUnitsDone;
+static uint32_t repeatsRemaining, phraseUnitsDone, heldStart, cycle;
+static uint8_t playbackMode, clockPulseCount;
 static uint8_t ppqn=1, gate, validClock, stutter;
 static uint32_t lastRiseMs, pulseMs, seed=0x12a74b19u;
 static float tempo=120.f;
@@ -20,6 +21,7 @@ void BBCut_init(void) {
   memset(ring,0,sizeof(ring));
   writePos=sampleCount=cutRemaining=cutLength=cutRead=repeatsRemaining=phraseUnitsDone=0;
   lastRiseMs=pulseMs=0; gate=validClock=stutter=0; tempo=120.f; ppqn=1;
+  heldStart=cycle=clockPulseCount=0; playbackMode=0;
 }
 void BBCut_setPpqn(uint8_t n) {
   if(n==1 || n==2 || n==4 || n==8 || n==16 || n==24) {
@@ -39,6 +41,9 @@ void BBCut_clockPulse(uint32_t now) {
         }
     }
     lastRiseMs=now;
+    clockPulseCount++;
+    /* Re-anchor phrase scheduling to the external beat boundary. */
+    if(clockPulseCount>=ppqn){clockPulseCount=0;cycle++;}
 }
 void BBCut_clockSample(float cv, uint32_t now) {
   if(!gate && cv>0.60f) {
@@ -70,45 +75,56 @@ static uint32_t samplesPerUnit(void) {
   /* Proc11 default sdiv=8, barlength=4 => half-beat cut units. */
   return clampSample((uint32_t)(BBCUT_FS*30.f/tempo));
 }
+/* BBCutProc11-derived phrase scheduler, constrained to a short ring buffer.
+ * A choice of live, backward repeat, half-speed and reverse prevents the
+ * previous single-loop implementation from endlessly cycling one fragment.
+ * Only recently recorded material is accessed. */
 static void nextBlock(void) {
-  /* BBCutProc11: phrases of 3 bars, 8 subdivision units/bar;
-   * normal blocks have odd lengths and 1-2 repeats;
-   * stutters are allowed in the final half-bar. */
-  if(phraseUnitsDone>=24u)phraseUnitsDone=0;
+  if(phraseUnitsDone>=24u) phraseUnitsDone=0;
   uint32_t left=24u-phraseUnitsDone;
   stutter=(left<=4u && (rng()%100u)<bbChance);
-  uint32_t units=1u, reps=1u;
+  uint32_t unit=samplesPerUnit();
   if(stutter) {
-    units=1u; reps=left*2u;
-    cutLength=clampSample(samplesPerUnit()/(2u+(bbSpeed/32u)));
+    cutLength=clampSample(unit/(2u+bbSpeed/24u));
+    repeatsRemaining=2u+(rng()%4u);
     phraseUnitsDone=24u;
   } else {
-    uint32_t candidate=(rng()%2u)*2u+1u; /* 1 or 3 units */
-    units=candidate>left?left:candidate;
-    reps=1u+((rng()&1u) && bbRepeat>0u ? (1u+bbRepeat/48u):0u);
-    if(reps*units>left){reps=1u;units=left;}
-    cutLength=clampSample(samplesPerUnit()*units);
-    phraseUnitsDone+=reps*units;
+    uint32_t odd=1u+2u*(rng()%3u);
+    if(odd>left) odd=left;
+    cutLength=clampSample(unit*odd);
+    repeatsRemaining=1u+((rng()%128u)<bbRepeat ? 1u+(rng()%3u):0u);
+    phraseUnitsDone+=odd*repeatsRemaining;
+    if(phraseUnitsDone>24u) phraseUnitsDone=24u;
   }
-  repeatsRemaining=reps;
-  cutRemaining=0u;
+  playbackMode=(uint8_t)(rng()%5u);
+  heldStart=(writePos+BBCUT_RING-cutLength)&BBCUT_MASK;
+  cutRemaining=0;
 }
 void BBCut_processStereo(int16_t *out,uint32_t frames) {
   for(uint32_t i=0;i<frames;i++) {
-    int32_t a=out[2*i],b=out[2*i+1];
-    int16_t mono=(int16_t)((a+b)/2);
-    ring[writePos&BBCUT_MASK]=mono;
-    uint16_t ready=(sampleCount>cutLength+64u);
-    if(!repeatsRemaining) nextBlock();
+    int32_t sum=(int32_t)out[i*2]+out[i*2+1];
+    int16_t mono=(int16_t)(sum/2);
+    ring[writePos]=mono;
+    if(!repeatsRemaining && !cutRemaining) nextBlock();
     if(!cutRemaining) {
-      if(repeatsRemaining>0u)repeatsRemaining--;
-      /* Repeat a previous chunk, never reading unwritten audio. */
-      cutRead=(writePos+BBCUT_RING-cutLength)&BBCUT_MASK;
       cutRemaining=cutLength;
+      if(repeatsRemaining)repeatsRemaining--;
+      cutRead=heldStart;
+      /* Nonrepeat blocks can pass through; other blocks pull from history. */
+      if(playbackMode==0u) cutRead=writePos;
+      else if(playbackMode==3u) cutRead=(writePos+BBCUT_RING-(cutLength/2u))&BBCUT_MASK;
+      else if(playbackMode==4u) cutRead=(writePos+BBCUT_RING-(rng()% (cutLength+1u)))&BBCUT_MASK;
     }
-    int16_t v=ready?ring[cutRead&BBCUT_MASK]:mono;
-    if(ready)cutRead=(cutRead+1u)&BBCUT_MASK;
-    out[2*i]=v;out[2*i+1]=v;
+    uint32_t progress=cutLength-cutRemaining;
+    uint32_t rd=cutRead;
+    if(playbackMode==1u)rd=(cutRead+cutLength-1u-progress)&BBCUT_MASK;
+    else if(playbackMode==2u)rd=(cutRead+(progress>>1))&BBCUT_MASK;
+    else rd=(cutRead+progress)&BBCUT_MASK;
+    int16_t result=(sampleCount>cutLength+64u)?ring[rd]:mono;
+    /* Short linear crossfade into cut edges to reduce clicks. */
+    uint32_t fade=progress<32u?progress: (cutRemaining<32u?cutRemaining:32u);
+    if(fade<32u)result=(int16_t)(((int32_t)result*(int32_t)fade+(int32_t)mono*(int32_t)(32u-fade))/32);
+    out[i*2]=result;out[i*2+1]=result;
     writePos=(writePos+1u)&BBCUT_MASK;
     if(sampleCount<BBCUT_RING)sampleCount++;
     cutRemaining--;
