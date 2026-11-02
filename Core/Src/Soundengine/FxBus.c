@@ -127,7 +127,7 @@ IN_ITCM_RAM void FxBus_process(int16_t *fxBuffer, int16_t* outL,int16_t* outR,in
             uint8_t external=BBCut_clockActive(HAL_GetTick());
             float bpm=external?BBCut_bpm():120.f;
             if(bpm<20.f)bpm=120.f;
-            uint8_t div=(uint8_t)fxBus.parameter[0];
+            uint8_t div=(uint8_t)(fxBus.parameter[0]*127.f+0.5f);
             if(div>5u)div=5u;
             const float beatMultipliers[6]={4.f,2.f,1.f,0.5f,0.25f,0.125f};
             if(div!=previousDiv || (bpm>previousBpm+0.25f) ||
