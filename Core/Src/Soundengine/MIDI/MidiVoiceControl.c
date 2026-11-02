@@ -91,7 +91,7 @@ void voiceControl_processQueue()
 {
 	/* Dispatch previously scheduled glitch events on the audio processing thread. */
 	idm_ensureInit();
-	Idm_tick(&idm,HAL_GetTick(),idm_emit,0);
+	/* IDUM queue processing disabled: master BBCut audio replaces trigger glitching. */
 	if(voiceControlStarted)
 	{
 		for(int voice=0;voice<7;voice++)
@@ -105,7 +105,7 @@ void voiceControl_processQueue()
 				if((buttonHandler_getMutedVoices()  & (1 << voice)) == 0)
 				{
 
-					if(voice<7) Idm_input(&idm,HAL_GetTick(),(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice],idm_emit,0);
+					if(voice<7) idm_emit(0,(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice]);
                     else idm_emit(0,(uint8_t)voice,voiceQueueNote[voice],voiceQueueVel[voice]);
 				}
 			}
