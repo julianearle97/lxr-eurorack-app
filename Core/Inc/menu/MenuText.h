@@ -62,7 +62,7 @@ const char menuText_any[]  	= "any";
 //-----------------------------------------------------------------
 const char cvSaveNames[][4] =
 {
-	{6}, // shared CV1 clock PPQN menu: legacy CV SAVE parameter is unused
+	{6}, // shared ACC1 clock PPQN menu: legacy CV SAVE parameter is unused
     {"1"},
     {"2"},
     {"4"},
@@ -78,7 +78,7 @@ const char cvSaveNames[][4] =
 const char cvSrcNames[][4] =
 {
 	{17},		//number of entries
-	{"---"},
+	{"cv1"},
 	{"cv2"},
 	{"cv3"},
 	{"cv4"},
