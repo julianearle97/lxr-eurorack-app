@@ -749,7 +749,8 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
-	if (BBCut_clockActive(HAL_GetTick())) BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
+	BBCut_setControls(activeParameters[PAR_IDM_MASTER_MODE],activeParameters[PAR_IDM_MASTER_CHANCE],activeParameters[PAR_IDM_MASTER_AMOUNT],activeParameters[PAR_IDM_MASTER_LENGTH]);
+	if (BBCut_enabled()) BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
