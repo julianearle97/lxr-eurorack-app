@@ -265,7 +265,12 @@ void adc_checkCv()
 			//{
 		//	if(newValue < 0.01f) newValue = 0.f;
 			adc_CvValues[i-8] = newValue;
-			if (i==8) BBCut_clockSample(newValue, HAL_GetTick());
+			if (i==8) {
+                static const uint8_t ppqnValues[6]={1,2,4,8,16,24};
+                uint8_t sel=activeParameters[PAR_CV_SAVE];
+                BBCut_setPpqn(ppqnValues[(sel<6)?sel:0]);
+                BBCut_clockSample(newValue, HAL_GetTick());
+            }
 			//}
 		}
 	}
