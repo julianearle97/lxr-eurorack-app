@@ -2993,8 +2993,11 @@ static void getMenuItemNameForValue(const uint8_t menuId, const uint8_t curParmV
 		p=cvSrcNames[curParmVal+1];
 		break;
 
-	case MENU_CV_SAVE:
-		p=cvSaveNames[curParmVal+1];
+	case MENU_DELAY_DIV:
+        p=delayDivisionNames[(curParmVal<6?curParmVal:0)+1];
+        break;
+    case MENU_CV_SAVE:
+        p=cvSaveNames[curParmVal+1];
 			break;
 
 
