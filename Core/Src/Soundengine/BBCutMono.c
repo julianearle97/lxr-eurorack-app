@@ -11,6 +11,9 @@ static uint32_t repeatsRemaining, phraseUnitsDone;
 static uint8_t ppqn=1, gate, validClock, stutter;
 static uint32_t lastRiseMs, pulseMs, seed=0x12a74b19u;
 static float tempo=120.f;
+static uint8_t bbEnabled=0,bbChance=50,bbRepeat=64,bbSpeed=64;
+void BBCut_setControls(uint8_t on,uint8_t chance,uint8_t repeat,uint8_t speed){bbEnabled=(on!=0);bbChance=chance;bbRepeat=repeat;bbSpeed=speed;}
+uint8_t BBCut_enabled(void){return bbEnabled;}
 static uint32_t rng(void) {seed^=seed<<13;seed^=seed>>17;seed^=seed<<5;return seed;}
 static uint32_t clampSample(uint32_t n) {if(n<16u)return 16u; if(n>BBCUT_RING-64u)return BBCUT_RING-64u; return n;}
 void BBCut_init(void) {
@@ -73,16 +76,16 @@ static void nextBlock(void) {
    * stutters are allowed in the final half-bar. */
   if(phraseUnitsDone>=24u)phraseUnitsDone=0;
   uint32_t left=24u-phraseUnitsDone;
-  stutter=(left<=4u && (rng()%10u)<2u);
+  stutter=(left<=4u && (rng()%100u)<bbChance);
   uint32_t units=1u, reps=1u;
   if(stutter) {
     units=1u; reps=left*2u;
-    cutLength=clampSample(samplesPerUnit()/2u);
+    cutLength=clampSample(samplesPerUnit()/(2u+(bbSpeed/32u)));
     phraseUnitsDone=24u;
   } else {
     uint32_t candidate=(rng()%2u)*2u+1u; /* 1 or 3 units */
     units=candidate>left?left:candidate;
-    reps=1u+(rng()&1u);
+    reps=1u+((rng()&1u) && bbRepeat>0u ? (1u+bbRepeat/48u):0u);
     if(reps*units>left){reps=1u;units=left;}
     cutLength=clampSample(samplesPerUnit()*units);
     phraseUnitsDone+=reps*units;
