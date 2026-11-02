@@ -687,6 +687,7 @@ const char longNames[][16] =
 	{"Sample"},
 	{"Pitch"},
 	{"Volume"},
+    {"BBCut Enable"}, {"BBCut Chance"}, {"BBCut Repeat"}, {"BBCut Speed"},
 };
 
 
