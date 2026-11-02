@@ -3365,7 +3365,8 @@ static void menu_encoderChangeParameter(int8_t inc)
 
 
 	if(paramNr >= PAR_IDM_V1_MODE && paramNr <= PAR_IDM_MASTER_LENGTH) {
-        if(((paramNr - PAR_IDM_V1_MODE)%4)==0 && *paramValue>6) *paramValue=6;
+        if(paramNr==PAR_IDM_MASTER_MODE && *paramValue>1) *paramValue=1;
+        else if(((paramNr - PAR_IDM_V1_MODE)%4)==0 && *paramValue>6) *paramValue=6;
         menu_applyIdm();
         return;
     }
