@@ -14,6 +14,7 @@
 #include <Soundengine/ModMatrix_Processor.h>
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/mixer.h"
+#include "Soundengine/BBCutMono.h"
 #include "Soundengine/DSPAudio/KickRumble.h"
 #include "Soundengine/SampleVoiceControl.h"
 #include "Soundengine/config.h"
@@ -748,6 +749,7 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
+	if (BBCut_clockActive(HAL_GetTick())) BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
