@@ -164,7 +164,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 		},
         /* Additional four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -228,7 +229,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Additional four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -292,7 +294,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Additional four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -345,7 +348,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Additional four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -402,7 +406,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -459,7 +464,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Additional four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
@@ -515,7 +521,8 @@ const Page menuPages[NUM_PAGES][NUM_SUB_PAGES] =
 
         /* Four-knob IDM trigger glitch page. */
         {
-            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,\n            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
+            TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,TEXT_EMPTY,
+            PAR_NONE,PAR_NONE,PAR_NONE,PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE
         },
         /* Four-knob oscillator sample page: SYN/SMP, SLOT, PITCH, VOLUME. */
         {
