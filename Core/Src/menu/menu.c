@@ -3608,6 +3608,14 @@ void menu_switchSubPage(uint8_t subPageNr, uint8_t toggle)
 	uint8_t activeParameter	= menuIndex & MASK_PARAMETER;
 	uint8_t activePage		= (menuIndex&MASK_PAGE)>>PAGE_SHIFT;
 
+	/* Perform page button cycles actual subpages, rather than the usual
+	   split-row parameter group toggle. All three are four-parameter pages. */
+	if (toggle && menu_activePage == PERF_PAGE) {
+		uint8_t next=(uint8_t)(activePage+1u);
+		if(next>=3u)next=0u;
+		menuIndex=(uint8_t)(next<<PAGE_SHIFT);
+		return;
+	}
 	if((toggle) && (subPageNr == activePage)) { // toggle only
 		// we are toggling to next screen, or back to first
 		if(activeParameter < 4) {
