@@ -794,7 +794,8 @@ static void init_gpio(void)
 
 	// port D: SD card, accent inputs and the trigger inputs, which interrupt on the falling edge
 	gpio_config(SDIO_CS_GPIO_Port, SDIO_CS_Pin, GPIO_MODE_INPUT, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
-	gpio_config(GPIOD, Accent_1_Pin|SD_CD_Pin|Accent_5_Pin|Accent_3_Pin|Accent_4_Pin|Accent_2_Pin|Accent_6_Pin, GPIO_MODE_INPUT, GPIO_PULLUP, GPIO_SPEED_FREQ_LOW);
+	gpio_config(GPIOD, SD_CD_Pin|Accent_5_Pin|Accent_3_Pin|Accent_4_Pin|Accent_2_Pin|Accent_6_Pin, GPIO_MODE_INPUT, GPIO_PULLUP, GPIO_SPEED_FREQ_LOW);
+	gpio_config(GPIOD, Accent_1_Pin, GPIO_MODE_IT_FALLING, GPIO_PULLUP, GPIO_SPEED_FREQ_LOW);
 	gpio_config(GPIOD, EXTI9_Trigger_7_Pin|EXT10I_Trigger_3_Pin|EXT11I_Trigger_2_Pin|EXT12I_Trigger_6_Pin|EXT13I_Trigger_5_Pin|EXTI14_Trigger_4_Pin|EXTI15_Trigger_1_Pin, GPIO_MODE_IT_FALLING, GPIO_PULLUP, GPIO_SPEED_FREQ_LOW);
 
 	// port E: LCD, encoder, LEDs and buttons
