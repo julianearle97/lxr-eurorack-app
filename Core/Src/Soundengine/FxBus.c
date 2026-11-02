@@ -191,8 +191,10 @@ IN_ITCM_RAM void FxBus_updateParameter()
 		break;
 
 	case FX_DELAY:
-		Delay_setRange(&fxBus.delay, fxBus.parameter[1]);
-		Delay_setDelayTime(&fxBus.delay, fxBus.parameter[0]);
+        if (!BBCut_clockActive(HAL_GetTick())) {
+            Delay_setRange(&fxBus.delay, fxBus.parameter[1]);
+            Delay_setDelayTime(&fxBus.delay, fxBus.parameter[0]);
+        }
 		Delay_setFilter(&fxBus.delay, fxBus.parameter[2]);
 		Delay_setFeedback(&fxBus.delay, fxBus.parameter[3]);
 
