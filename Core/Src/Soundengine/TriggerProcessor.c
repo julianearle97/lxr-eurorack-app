@@ -19,6 +19,7 @@
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "limits.h"
 #include "Soundengine/config.h"
+#include "Soundengine/BBCutMono.h"
 #include "Soundengine/DSPAudio/medianFilter.h"
 
 #include "main.h"
@@ -242,7 +243,7 @@ uint8_t Trigger_getAccent(uint8_t voice)
 	switch(voice)
 	{
 	case 0:
-		pinState = (Accent_1_GPIO_Port->IDR & Accent_1_Pin);
+		pinState = 0;
 		break;
 
 	case 1:
@@ -356,6 +357,13 @@ void EXTI15_10_IRQHandler(void)
 
 void EXTI9_5_IRQHandler(void)
 {
+    if (__HAL_GPIO_EXTI_GET_IT(Accent_1_Pin) != RESET) {
+        __HAL_GPIO_EXTI_CLEAR_IT(Accent_1_Pin);
+        static const uint8_t divisions[6]={1,2,4,8,16,24};
+        uint8_t index=activeParameters[PAR_CV_SAVE];
+        BBCut_setPpqn(divisions[index<6?index:0]);
+        BBCut_clockPulse(HAL_GetTick());
+    }
 
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_9) != RESET)
 	{
