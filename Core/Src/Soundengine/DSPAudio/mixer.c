@@ -750,7 +750,22 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
 	BBCut_setControls(activeParameters[PAR_IDM_MASTER_MODE],activeParameters[PAR_IDM_MASTER_CHANCE],activeParameters[PAR_IDM_MASTER_AMOUNT],activeParameters[PAR_IDM_MASTER_LENGTH]);
-	if (BBCut_enabled()) BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
+	if (BBCut_enabled()) {
+        /* Master processing: collapse all four physical outputs to mono
+           before slicing, so routing to DAC2 no longer bypasses BBCut.
+           Outputs 1-4 carry the same post-BBCut mono signal. */
+        for (uint32_t i=0;i<OUTPUT_DMA_SIZE;i++) {
+            int32_t mix=(int32_t)output[2*i]+output[2*i+1]
+                      +(int32_t)output2[2*i]+output2[2*i+1];
+            mix/=2;
+            if(mix>32767)mix=32767;
+            if(mix<(-32768))mix=-32768;
+            output2[2*i]=(int16_t)mix;
+            output2[2*i+1]=(int16_t)mix;
+        }
+        BBCut_processStereo(output2, OUTPUT_DMA_SIZE);
+        for(uint32_t i=0;i<OUTPUT_DMA_SIZE*2;i++) output[i]=output2[i];
+    }
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{
