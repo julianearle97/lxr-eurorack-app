@@ -13,24 +13,15 @@
 #include "Soundengine/BBCutMono.h"
 #include <string.h>
 
-/* Two separate buffers: a recent audio history and a frozen fragment.
- * 32768 / 44140 = 0.742 seconds, sufficient for 3/8 at 140 BPM.
- * A separate frozen cut prevents later repeats from following the live
- * ring write head or being overwritten during longer phrase repetitions.
- * RAM cost: 128 KiB, up from the old engine's 32 KiB.
- */
-#define LC_CAPACITY 32768u
-#define LC_MASK (LC_CAPACITY - 1u)
+/* Frozen live-captured cut: one sample is captured per processed sample.\n * Never memcpy a large region inside the real-time audio interrupt.\n * 65536 mono int16 samples = 128 KiB / ~1.48 seconds at 44.14 kHz.\n */\n#define LC_CAPACITY 65536u
 #define LC_FS 44140u
 #define LC_SUBDIV 8u /* units per 4/4 bar; one unit is an eighth note */
 #define LC_MAX_CUTS 512u
 
-static int16_t history[LC_CAPACITY];
 static int16_t frozen[LC_CAPACITY];
-static uint32_t write_pos, history_valid;
-static uint32_t frozen_len, cut_pos, unit_samples;
+static uint32_t frozen_len, cut_pos;
 static uint32_t repeats_remaining, phrase_done, phrase_total;
-static uint32_t phrase_bars, selected_units, capture_pending;
+static uint32_t phrase_bars, capture_pending;
 static uint32_t seed = 0x12a74b19u;
 static uint32_t last_rise_ms, pulse_ms;
 static uint8_t ppqn = 1u, gate, valid_clock;
@@ -105,33 +96,17 @@ static void lc_choose_block(void) {
     if(length < 32u) length=32u;
     if(length > LC_CAPACITY) length=LC_CAPACITY;
     frozen_len=length;
-    selected_units=units;
     repeats_remaining=repeats;
     /* The phrase progresses by total played musical units. */
-    phrase_done += units;
+    phrase_done += (fractional_units < 1.0f ? units : units*repeats);
     capture_pending=1u;
     cut_pos=0u;
 }
-static void lc_capture(void) {
-    /* Capturing an already-heard fragment rather than future audio avoids
-     * waiting a whole cut before the first stutter can start. The source
-     * fragment stays fixed across every repeat in this block. */
-    if(history_valid < frozen_len) {
-        capture_pending=0u;
-        repeats_remaining=0u;
-        return;
-    }
-    uint32_t start=(write_pos + LC_CAPACITY - frozen_len) & LC_MASK;
-    for(uint32_t i=0;i<frozen_len;i++) frozen[i]=history[(start+i)&LC_MASK];
-    cut_pos=0u;
-    capture_pending=0u;
-}
 void BBCut_init(void) {
-    memset(history,0,sizeof(history));
     memset(frozen,0,sizeof(frozen));
-    write_pos=history_valid=frozen_len=cut_pos=0u;
-    unit_samples=repeats_remaining=phrase_done=phrase_total=0u;
-    phrase_bars=selected_units=capture_pending=0u;
+    frozen_len=cut_pos=0u;
+    repeats_remaining=phrase_done=phrase_total=0u;
+    phrase_bars=capture_pending=0u;
     last_rise_ms=pulse_ms=0u;
     ppqn=1u; gate=valid_clock=enabled_previous=0u;
     tempo=120.0f;
@@ -181,20 +156,21 @@ void BBCut_processStereo(int16_t *out,uint32_t frames) {
         const int32_t left=out[2u*i], right=out[2u*i+1u];
         const int16_t mono=(int16_t)((left+right)/2);
         if(repeats_remaining==0u)lc_choose_block();
-        if(capture_pending)lc_capture();
         int16_t value=mono;
         if(repeats_remaining && frozen_len) {
-            value=frozen[cut_pos];
+            if(capture_pending) frozen[cut_pos]=mono;
+            else value=frozen[cut_pos];
             cut_pos++;
             if(cut_pos>=frozen_len) {
                 cut_pos=0u;
+                capture_pending=0u;
                 repeats_remaining--;
             }
         }
         /* Smooth edges at cut boundaries, without spending CPU on
          * pitch-shifting / time-stretching. Short 32-frame fades avoid clicks.
          * Fading occurs against the real input signal at the edges. */
-        if(repeats_remaining && frozen_len>64u) {
+        if(!capture_pending && repeats_remaining && frozen_len>64u) {
             uint32_t edge=cut_pos < (frozen_len-cut_pos) ? cut_pos : (frozen_len-cut_pos);
             if(edge<32u) {
                 uint32_t dry=32u-edge;
@@ -203,8 +179,5 @@ void BBCut_processStereo(int16_t *out,uint32_t frames) {
         }
         out[2u*i]=value;
         out[2u*i+1u]=value;
-        history[write_pos]=mono;
-        write_pos=(write_pos+1u)&LC_MASK;
-        if(history_valid<LC_CAPACITY)history_valid++;
     }
 }
