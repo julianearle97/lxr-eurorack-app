@@ -1,7 +1,7 @@
 name: BBCut firmware compile check
 on:
   push:
-    branches: [feature/bbcut-cv1-clock]
+    branches: [feature/bbcut-cv1-clock, feature/livecut-phrase-port]
   workflow_dispatch:
 jobs:
   build:
