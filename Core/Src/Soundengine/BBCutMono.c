@@ -13,7 +13,11 @@
 #include "Soundengine/BBCutMono.h"
 #include <string.h>
 
-/* Frozen live-captured cut: one sample is captured per processed sample.\n * Never memcpy a large region inside the real-time audio interrupt.\n * 65536 mono int16 samples = 128 KiB / ~1.48 seconds at 44.14 kHz.\n */\n#define LC_CAPACITY 65536u
+/* Frozen live-captured cut: one sample is captured per processed sample.
+ * Never memcpy a large region inside the real-time audio interrupt.
+ * 65536 mono int16 samples = 128 KiB / ~1.48 seconds at 44.14 kHz.
+ */
+#define LC_CAPACITY 65536u
 #define LC_FS 44140u
 #define LC_SUBDIV 8u /* units per 4/4 bar; one unit is an eighth note */
 #define LC_MAX_CUTS 512u
